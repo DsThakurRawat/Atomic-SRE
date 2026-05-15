@@ -1,6 +1,12 @@
 """Agentic SRE using pydantic-ai."""
 
 from pydantic_ai import Agent
+from pydantic_ai.models.anthropic import AnthropicModel
+from pydantic_ai.models.bedrock import BedrockModel
+from pydantic_ai.models.gemini import GeminiModel
+from pydantic_ai.models.groq import GroqModel
+from pydantic_ai.models.ollama import OllamaModel
+from pydantic_ai.models.openai import OpenAIModel
 
 from agentic_sre.core.models import ErrorDiagnosis
 from agentic_sre.core.prompts import SYSTEM_PROMPT, build_diagnosis_prompt
@@ -10,6 +16,23 @@ from agentic_sre.core.tools import (
     create_github_mcp_toolset,
     create_slack_mcp_toolset,
 )
+
+
+def _get_model(config: AgentSettings):
+    """Resolve the pydantic-ai model object from configuration."""
+    model_id = config.model
+    
+    # Handle Ollama specifically for the host URL
+    if model_id.startswith("ollama:"):
+        base_id = model_id.replace("ollama:", "")
+        return OllamaModel(base_id, base_url=f"{config.ollama_host}/v1")
+    
+    # Handle Bedrock specifically for the region
+    if model_id.startswith("bedrock:"):
+        base_id = model_id.replace("bedrock:", "")
+        return BedrockModel(base_id, region_name=config.aws.region)
+    
+    return model_id
 
 
 def create_agentic_sre(config: AgentSettings) -> Agent[None, ErrorDiagnosis]:
@@ -28,7 +51,7 @@ def create_agentic_sre(config: AgentSettings) -> Agent[None, ErrorDiagnosis]:
     ]
 
     return Agent(
-        config.model,
+        _get_model(config),
         system_prompt=SYSTEM_PROMPT,
         output_type=ErrorDiagnosis,
         toolsets=toolsets,
