@@ -18,6 +18,8 @@ dependencies = [
     "langchain-openai>=0.3.5",
     "langchain-anthropic>=0.3.6",
     "pydantic-ai>=0.0.14",
+    "questionary>=2.0.1",
+    "platformdirs>=4.2.0",
 ]
 
 [project.scripts]
