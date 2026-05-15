@@ -35,6 +35,31 @@ MODEL_PROVIDER_CHOICES: tuple[tuple[str, str], ...] = (
     ("OpenRouter", MODEL_PROVIDER_OPENROUTER),
     ("Amazon Bedrock", MODEL_PROVIDER_BEDROCK),
 )
+
+MODEL_CHOICES_ANTHROPIC: tuple[tuple[str, str], ...] = (
+    ("Claude 3.5 Sonnet", "anthropic:claude-3-5-sonnet-20241022"),
+    ("Claude 3.5 Haiku", "anthropic:claude-3-5-haiku-20241022"),
+    ("Claude 3 Opus", "anthropic:claude-3-opus-20240229"),
+)
+
+MODEL_CHOICES_GROQ: tuple[tuple[str, str], ...] = (
+    ("Llama 3.3 70B (Versatile)", "groq:llama-3.3-70b-versatile"),
+    ("Llama 3.1 70B (Versatile)", "groq:llama-3.1-70b-versatile"),
+    ("Llama 3.1 8B (Instant)", "groq:llama-3.1-8b-instant"),
+    ("Mixtral 8x7B", "groq:mixtral-8x7b-32768"),
+)
+
+MODEL_CHOICES_OPENAI: tuple[tuple[str, str], ...] = (
+    ("GPT-4o", "openai:gpt-4o"),
+    ("GPT-4o mini", "openai:gpt-4o-mini"),
+    ("o1-preview", "openai:o1-preview"),
+)
+
+MODEL_CHOICES_GEMINI: tuple[tuple[str, str], ...] = (
+    ("Gemini 1.5 Pro", "google-gla:gemini-1.5-pro"),
+    ("Gemini 1.5 Flash", "google-gla:gemini-1.5-flash"),
+)
+
 NOTIFICATION_PLATFORM_CHOICES: tuple[tuple[str, str], ...] = (
     ("Slack", NOTIFICATION_PLATFORM_SLACK),
 )
