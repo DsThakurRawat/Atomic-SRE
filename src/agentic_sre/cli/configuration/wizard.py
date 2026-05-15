@@ -13,6 +13,12 @@ from agentic_sre.cli.configuration.options import (
     DEPLOYMENT_PLATFORM_CHOICES,
     LEGACY_SELECTION_ENV_KEYS,
     MODEL_PROVIDER_ANTHROPIC,
+    MODEL_PROVIDER_GROQ,
+    MODEL_PROVIDER_OLLAMA,
+    MODEL_PROVIDER_OPENAI,
+    MODEL_PROVIDER_GEMINI,
+    MODEL_PROVIDER_OPENROUTER,
+    MODEL_PROVIDER_BEDROCK,
     MODEL_PROVIDER_CHOICES,
     NOTIFICATION_PLATFORM_CHOICES,
     NOTIFICATION_PLATFORM_SLACK,
@@ -203,8 +209,60 @@ def _configure_model_provider(
             env_values.get("ANTHROPIC_API_KEY"),
             force_reconfigure,
         )
-    else:
-        _clear_env_keys(updates, "ANTHROPIC_API_KEY")
+    elif model_provider == MODEL_PROVIDER_OPENAI:
+        updates["OPENAI_API_KEY"] = _prompt_secret(
+            "OpenAI API key:",
+            env_values.get("OPENAI_API_KEY"),
+            force_reconfigure,
+        )
+    elif model_provider == MODEL_PROVIDER_GROQ:
+        updates["GROQ_API_KEY"] = _prompt_secret(
+            "Groq API key:",
+            env_values.get("GROQ_API_KEY"),
+            force_reconfigure,
+        )
+    elif model_provider == MODEL_PROVIDER_GEMINI:
+        updates["GOOGLE_API_KEY"] = _prompt_secret(
+            "Google Gemini API key:",
+            env_values.get("GOOGLE_API_KEY"),
+            force_reconfigure,
+        )
+    elif model_provider == MODEL_PROVIDER_OPENROUTER:
+        updates["OPENROUTER_API_KEY"] = _prompt_secret(
+            "OpenRouter API key:",
+            env_values.get("OPENROUTER_API_KEY"),
+            force_reconfigure,
+        )
+    elif model_provider == MODEL_PROVIDER_OLLAMA:
+        updates["OLLAMA_HOST"] = _prompt_text(
+            "Ollama Host URL:",
+            env_values.get("OLLAMA_HOST") or "http://localhost:11434",
+            force_reconfigure,
+        )
+    elif model_provider == MODEL_PROVIDER_BEDROCK:
+        # Bedrock typically uses AWS credentials which are configured in the deployment step,
+        # but we might want to confirm the model ID here.
+        pass
+
+    # Clear other keys to keep env clean
+    for provider, key in [
+        (MODEL_PROVIDER_ANTHROPIC, "ANTHROPIC_API_KEY"),
+        (MODEL_PROVIDER_OPENAI, "OPENAI_API_KEY"),
+        (MODEL_PROVIDER_GROQ, "GROQ_API_KEY"),
+        (MODEL_PROVIDER_GEMINI, "GOOGLE_API_KEY"),
+        (MODEL_PROVIDER_OPENROUTER, "OPENROUTER_API_KEY"),
+    ]:
+        if model_provider != provider:
+            _clear_env_keys(updates, key)
+
+    # Prompt for the specific model ID
+    current_model = env_values.get("MODEL") or config.integrations.model
+    updates["MODEL"] = _prompt_text(
+        "Model ID (e.g. gpt-4o, claude-3-5-sonnet, etc.):",
+        current_model,
+        force_reconfigure,
+    )
+
     return model_provider
 
 
@@ -462,6 +520,16 @@ def _append_model_missing_items(
     )
     if model_provider == MODEL_PROVIDER_ANTHROPIC and not env_values.get("ANTHROPIC_API_KEY"):
         missing.append(_MissingConfigItem("Anthropic API key", visible=False))
+    elif model_provider == MODEL_PROVIDER_OPENAI and not env_values.get("OPENAI_API_KEY"):
+        missing.append(_MissingConfigItem("OpenAI API key", visible=False))
+    elif model_provider == MODEL_PROVIDER_GROQ and not env_values.get("GROQ_API_KEY"):
+        missing.append(_MissingConfigItem("Groq API key", visible=False))
+    elif model_provider == MODEL_PROVIDER_GEMINI and not env_values.get("GOOGLE_API_KEY"):
+        missing.append(_MissingConfigItem("Google Gemini API key", visible=False))
+    elif model_provider == MODEL_PROVIDER_OPENROUTER and not env_values.get("OPENROUTER_API_KEY"):
+        missing.append(_MissingConfigItem("OpenRouter API key", visible=False))
+    elif model_provider == MODEL_PROVIDER_OLLAMA and not env_values.get("OLLAMA_HOST"):
+        missing.append(_MissingConfigItem("Ollama Host URL"))
 
 
 def _append_notification_missing_items(
