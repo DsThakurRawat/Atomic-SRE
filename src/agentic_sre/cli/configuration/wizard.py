@@ -20,6 +20,10 @@ from agentic_sre.cli.configuration.options import (
     MODEL_PROVIDER_OPENROUTER,
     MODEL_PROVIDER_BEDROCK,
     MODEL_PROVIDER_CHOICES,
+    MODEL_CHOICES_ANTHROPIC,
+    MODEL_CHOICES_GROQ,
+    MODEL_CHOICES_OPENAI,
+    MODEL_CHOICES_GEMINI,
     NOTIFICATION_PLATFORM_CHOICES,
     NOTIFICATION_PLATFORM_SLACK,
 )
@@ -256,12 +260,39 @@ def _configure_model_provider(
             _clear_env_keys(updates, key)
 
     # Prompt for the specific model ID
+    model_choices_map = {
+        MODEL_PROVIDER_ANTHROPIC: MODEL_CHOICES_ANTHROPIC,
+        MODEL_PROVIDER_GROQ: MODEL_CHOICES_GROQ,
+        MODEL_PROVIDER_OPENAI: MODEL_CHOICES_OPENAI,
+        MODEL_PROVIDER_GEMINI: MODEL_CHOICES_GEMINI,
+    }
+    
     current_model = env_values.get("MODEL") or config.integrations.model
-    updates["MODEL"] = _prompt_text(
-        "Model ID (e.g. gpt-4o, claude-3-5-sonnet, etc.):",
-        current_model,
-        force_reconfigure,
-    )
+    choices = model_choices_map.get(model_provider)
+    
+    if choices:
+        # Add 'Custom' option to the list
+        all_choices = list(choices) + [("Custom (type your own)", "custom")]
+        selected_model = _prompt_choice(
+            "Select model:",
+            current_model if _is_supported_choice(current_model, tuple(all_choices)) else None,
+            force_reconfigure,
+            tuple(all_choices),
+        )
+        if selected_model == "custom":
+            selected_model = _prompt_text(
+                "Model ID (e.g. gpt-4o, claude-3-5-sonnet, etc.):",
+                current_model,
+                force_reconfigure,
+            )
+        updates["MODEL"] = selected_model
+    else:
+        # For providers without presets (Ollama, OpenRouter, Bedrock)
+        updates["MODEL"] = _prompt_text(
+            "Model ID (e.g. ollama:llama3, bedrock:anthropic.claude-v2, etc.):",
+            current_model,
+            force_reconfigure,
+        )
 
     return model_provider
 

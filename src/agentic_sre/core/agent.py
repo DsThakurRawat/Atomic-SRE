@@ -2,7 +2,7 @@
 
 from pydantic_ai import Agent
 from pydantic_ai.models.anthropic import AnthropicModel
-from pydantic_ai.models.bedrock import BedrockModel
+from pydantic_ai.models.bedrock import BedrockConverseModel
 from pydantic_ai.models.gemini import GeminiModel
 from pydantic_ai.models.groq import GroqModel
 from pydantic_ai.models.ollama import OllamaModel
@@ -30,7 +30,7 @@ def _get_model(config: AgentSettings):
     # Handle Bedrock specifically for the region
     if model_id.startswith("bedrock:"):
         base_id = model_id.replace("bedrock:", "")
-        return BedrockModel(base_id, region_name=config.aws.region)
+        return BedrockConverseModel(base_id, region_name=config.aws.region)
     
     return model_id
 
