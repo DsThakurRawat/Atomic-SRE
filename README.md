@@ -175,3 +175,4 @@ If you want to run a direct diagnosis without the CLI:
 docker compose up -d slack
 uv run python -m agentic_sre.run /aws/containerinsights/no-loafers-for-you/application currencyservice 10
 ```
+# Agentic-SRE
