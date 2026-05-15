@@ -17,6 +17,7 @@ dependencies = [
     "langgraph>=0.2.70",
     "langchain-openai>=0.3.5",
     "langchain-anthropic>=0.3.6",
+    "pydantic-ai>=0.0.14",
 ]
 
 [project.scripts]
@@ -31,8 +32,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=8.3.4",
     "mypy>=1.15.0",
     "ruff>=0.9.6",
