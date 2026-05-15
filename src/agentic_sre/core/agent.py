@@ -1,0 +1,62 @@
+"""Agentic SRE using pydantic-ai."""
+
+from pydantic_ai import Agent
+
+from agentic_sre.core.models import ErrorDiagnosis
+from agentic_sre.core.prompts import SYSTEM_PROMPT, build_diagnosis_prompt
+from agentic_sre.core.settings import AgentSettings, get_settings
+from agentic_sre.core.tools import (
+    create_cloudwatch_toolset,
+    create_github_mcp_toolset,
+    create_slack_mcp_toolset,
+)
+
+
+def create_agentic_sre(config: AgentSettings) -> Agent[None, ErrorDiagnosis]:
+    """Create the Agentic SRE with all toolsets configured.
+
+    Args:
+        config: AgentSettings.
+
+    Returns:
+        Configured pydantic-ai Agent with structured output.
+    """
+    toolsets = [
+        create_cloudwatch_toolset(config),
+        create_github_mcp_toolset(config),
+        create_slack_mcp_toolset(config),
+    ]
+
+    return Agent(
+        config.model,
+        system_prompt=SYSTEM_PROMPT,
+        output_type=ErrorDiagnosis,
+        toolsets=toolsets,
+    )
+
+
+async def diagnose_error(
+    log_group: str,
+    service_name: str,
+    time_range_minutes: int = 10,
+    config: AgentSettings | None = None,
+) -> ErrorDiagnosis:
+    """Run a diagnosis for errors in a specific log group.
+
+    Args:
+        log_group: CloudWatch log group to analyse.
+        service_name: Service name to filter.
+        time_range_minutes: How far back to look for errors.
+        config: Optional agent configuration.
+
+    Returns:
+        ErrorDiagnosis with findings and suggested fixes.
+    """
+    if config is None:
+        config = get_settings()
+
+    agent = create_agentic_sre(config)
+    prompt = build_diagnosis_prompt(config, log_group, service_name, time_range_minutes)
+
+    result = await agent.run(prompt)
+    return result.output

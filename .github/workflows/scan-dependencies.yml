@@ -1,0 +1,40 @@
+name: Scan Python Dependencies
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      [opened, reopened, synchronize]
+    branches:
+      - main
+      - develop
+    paths:
+      - '**/uv.lock'
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - '**/uv.lock'
+
+jobs:
+  pip_audit:
+    name: pip-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+
+      - uses: pypa/gh-action-pip-audit@v1.1.0
