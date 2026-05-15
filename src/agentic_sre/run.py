@@ -48,7 +48,7 @@ def _load_request_from_args_or_env() -> tuple[str, str, int]:
     return log_group, service_name, time_range_minutes
 
 
-async def main() -> None:
+async def _main() -> None:
     """Run the Agentic SRE."""
     log_group, service_name, time_range_minutes = _load_request_from_args_or_env()
 
@@ -79,5 +79,10 @@ async def main() -> None:
         sys.exit(1)
 
 
+def main() -> None:
+    """Sync entry point for the CLI."""
+    asyncio.run(_main())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
