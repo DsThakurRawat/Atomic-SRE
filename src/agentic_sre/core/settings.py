@@ -61,6 +61,12 @@ class AgentSettings(BaseSettings):
 
     # LLM Provider
     anthropic_api_key: str | None = Field(default=None, alias="ANTHROPIC_API_KEY")
+    openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
+    groq_api_key: str | None = Field(default=None, alias="GROQ_API_KEY")
+    google_api_key: str | None = Field(default=None, alias="GOOGLE_API_KEY")
+    openrouter_api_key: str | None = Field(default=None, alias="OPENROUTER_API_KEY")
+    ollama_host: str = Field(default="http://localhost:11434", alias="OLLAMA_HOST")
+
     model: str = Field(default="claude-sonnet-4-5-20250929", alias="MODEL")
 
     # Sub-configs (required)
