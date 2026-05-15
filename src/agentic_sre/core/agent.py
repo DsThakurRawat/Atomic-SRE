@@ -1,12 +1,10 @@
 """Agentic SRE using pydantic-ai."""
 
-from pydantic_ai import Agent
-from pydantic_ai.models.anthropic import AnthropicModel
+from pydantic_ai import Agent, models
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.ollama import OllamaProvider
 from pydantic_ai.models.bedrock import BedrockConverseModel
-from pydantic_ai.models.gemini import GeminiModel
-from pydantic_ai.models.groq import GroqModel
-from pydantic_ai.models.ollama import OllamaModel
-from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.bedrock import BedrockProvider
 
 from agentic_sre.core.models import ErrorDiagnosis
 from agentic_sre.core.prompts import SYSTEM_PROMPT, build_diagnosis_prompt
@@ -25,12 +23,12 @@ def _get_model(config: AgentSettings):
     # Handle Ollama specifically for the host URL
     if model_id.startswith("ollama:"):
         base_id = model_id.replace("ollama:", "")
-        return OllamaModel(base_id, base_url=f"{config.ollama_host}/v1")
+        return OpenAIChatModel(base_id, provider=OllamaProvider(base_url=f"{config.ollama_host}/v1"))
     
     # Handle Bedrock specifically for the region
     if model_id.startswith("bedrock:"):
         base_id = model_id.replace("bedrock:", "")
-        return BedrockConverseModel(base_id, region_name=config.aws.region)
+        return BedrockConverseModel(base_id, provider=BedrockProvider(region_name=config.aws.region))
     
     return model_id
 
