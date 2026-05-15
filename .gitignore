@@ -222,3 +222,6 @@ __marimo__/
 RELEASE.md
 /docs/local/
 *.local.md
+
+# Temporary repository clones
+tmp_repos/
