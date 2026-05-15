@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.scripts]
-agentic-sre = "agentic_sre.run:main"
+agentic-sre = "agentic_sre.cli.main:main"
 agentic-sre-run-tool-call-eval = "agentic_sre.eval.tool_call.run:main"
 agentic-sre-run-diagnosis-quality-eval = "agentic_sre.eval.diagnosis_quality.run:main"
 
