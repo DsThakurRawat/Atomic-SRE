@@ -23,6 +23,7 @@ dependencies = [
     "opik",
     "questionary>=2.0.1",
     "platformdirs>=4.2.0",
+    "langchain-groq>=1.1.2",
 ]
 
 [project.scripts]

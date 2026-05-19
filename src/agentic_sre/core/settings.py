@@ -30,7 +30,10 @@ class GitHubSettings(BaseSettings):
 
     # Required: cannot be empty
     personal_access_token: str = Field(description="GitHub Personal Access Token")
-    mcp_url: str = Field(description="URL of GitHub MCP server (SSE)")
+    mcp_url: str = Field(
+        default="https://api.githubcopilot.com/mcp/",
+        description="URL of GitHub MCP server (SSE)",
+    )
     owner: str = Field(description="Default GitHub repository owner")
     repo: str = Field(description="Default GitHub repository name")
     ref: str = Field(description="Preferred GitHub ref (branch, tag, or SHA)")
@@ -47,7 +50,10 @@ class SlackSettings(BaseSettings):
 
     # Required: cannot be empty
     channel_id: str = Field(description="Slack channel ID (Cxxxxxxxxxx)")
-    mcp_url: str = Field(description="URL of Slack MCP server (SSE)")
+    mcp_url: str = Field(
+        default="http://localhost:13080/sse",
+        description="URL of Slack MCP server (SSE)",
+    )
 
 
 class AgentSettings(BaseSettings):

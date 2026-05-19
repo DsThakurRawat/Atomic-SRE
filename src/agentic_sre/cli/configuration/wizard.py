@@ -192,7 +192,7 @@ def _run_config_wizard(
     return config
 
 
-def _configure_model_provider(
+def _configure_model_provider(  # noqa: C901
     config: CliConfig,
     env_values: dict[str, str],
     force_reconfigure: bool,

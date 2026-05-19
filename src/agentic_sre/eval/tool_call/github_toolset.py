@@ -32,7 +32,13 @@ async def build_github_toolset() -> list[BaseTool]:
     }
 
     client = MultiServerMCPClient(connections)
-    tools = cast(list[BaseTool], await client.get_tools())
+    all_tools = cast(list[BaseTool], await client.get_tools())
+
+    allowed_github_tools = {"search_code", "get_file_contents"}
+    tools = [
+        t for t in all_tools
+        if any(allowed in t.name for allowed in allowed_github_tools)
+    ]
 
     for tool in tools:
         coroutine = getattr(tool, "coroutine", None)
