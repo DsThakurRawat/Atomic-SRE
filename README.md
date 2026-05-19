@@ -24,14 +24,33 @@ Welcome to **Atomic SRE**. This is a premium, open-source multi-agent orchestrat
 - [Docker](https://docs.docker.com/get-docker/) (required for local mode)
 
 ## 1️⃣ Install Atomic SRE
+
+You can install Atomic SRE using one of the following methods:
+
+### Option A: Direct Installer (via `curl` - Recommended for developers)
+This automatically verifies prerequisites, installs the `uv` package manager, clones the repository, and configures all dependencies:
+```bash
+curl -sSL https://raw.githubusercontent.com/DsThakurRawat/Atomic-SRE/main/install.sh | bash
+```
+
+### Option B: Python Package Manager (via `pip`)
+If you want to install the package directly from PyPI:
 ```bash
 pip install atomic-sre
 ```
 
 ## 2️⃣ Start the CLI
-```bash
-atomic-sre
-```
+
+Depending on your installation method:
+
+* **For curl installation**:
+  ```bash
+  cd Atomic-SRE && uv run atomic-sre
+  ```
+* **For pip installation**:
+  ```bash
+  atomic-sre
+  ```
 
 On first run, the setup wizard will guide you through configuration:
 
@@ -124,6 +143,27 @@ Atomic SRE is built using modern, production-ready AI agent frameworks:
 - **Evaluation & Tracing**: [Opik](https://github.com/comet-ml/opik) for automated span/trace capturing and dataset generation
 - **Logging & Infrastructure**: AWS CloudWatch (Logs client), Docker
 - **Remote Orchestration**: AWS ECS (deployment environment)
+
+# 📁 Project Structure
+
+Here is the folder structure of the `Atomic-SRE` project workspace:
+
+```text
+Atomic-SRE/
+├── docs/                 # Documentation and visual assets
+│   └── imgs/             # CLI screenshots, home banner, and logos
+├── src/
+│   └── atomic_sre/       # Core package source code
+│       ├── cli/          # CLI presentation, configurations, and guided shell
+│       ├── config/       # Shared path settings and global configurations
+│       ├── core/         # Core agent reasoning logic, model routing, and tool definitions
+│       └── eval/         # Evaluation suites for tool calls and diagnosis quality
+├── tests/                # Unit test suite
+├── pyproject.toml        # Build configuration, script entrypoints, and dependencies
+├── install.sh            # Automated curl installation script
+├── README.md             # Project overview and quick start guide
+└── DEVELOPMENT.md        # Technical developer guide
+```
 
 # 🗺️ Integration Roadmap
 
