@@ -11,7 +11,7 @@ from rich.text import Text
 from atomic_sre.cli.presentation.ascii_art import get_ascii_art
 from atomic_sre.cli.presentation.console import console
 
-_COLOURS = ["#FDE68A", "#FBBF24", "#F59E0B", "#D97706"]
+_COLOURS = ["#4ADE80", "#22C55E", "#16A34A", "#15803D"]
 _ANIMATION_FRAMES = 12
 _FRAME_DELAY = 0.1
 
@@ -59,12 +59,12 @@ def _build_banner(colour_offset: int) -> Panel:
     banner_text.append("\n")
 
     footer_text = Text(justify="right")
-    footer_text.append(f"v{_get_version()}\n", style="#FBBF24")
+    footer_text.append(f"v{_get_version()}\n", style="#22C55E")
     footer_text.append("Made by DIVYANSH RAWAT", style="dim white")
     return Panel(
         Group(banner_text, footer_text),
         title="Welcome to Atomic SRE",
-        border_style="#FBBF24",
+        border_style="#22C55E",
         expand=True,
     )
 
