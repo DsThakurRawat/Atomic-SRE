@@ -1,17 +1,18 @@
 """GitHub MCP toolset construction for tool call evaluation."""
 
 import os
-from typing import Any
+from typing import Any, cast
 
 import opik
-from pydantic_ai.mcp import MCPServerStreamableHTTP
+from langchain_core.tools import BaseTool
+from langchain_mcp_adapters.client import MultiServerMCPClient
 
 
-def build_github_toolset() -> MCPServerStreamableHTTP:
+async def build_github_toolset() -> list[BaseTool]:
     """Build a real GitHub MCP toolset.
 
     Returns:
-        A GitHub MCP toolset.
+        A list of GitHub MCP tools.
     """
     token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
 
@@ -22,38 +23,58 @@ def build_github_toolset() -> MCPServerStreamableHTTP:
         )
         raise RuntimeError(msg)
 
-    # spellchecker:ignore-next-line
-    headers = {"Authorization": f"Bearer {token}"}
+    connections = {
+        "github": {
+            "transport": "streamable_http",
+            "url": "https://api.githubcopilot.com/mcp/",
+            "headers": {"Authorization": f"Bearer {token}"},
+        }
+    }
 
-    async def process_tool_call(
-        _ctx: Any,
-        call_tool: Any,
-        name: str,
-        args: dict[str, Any],
-    ) -> Any:
-        """Process a tool call.
+    client = MultiServerMCPClient(connections)
+    tools = cast(list[BaseTool], await client.get_tools())
 
-        Args:
-            _ctx: The context.
-            call_tool: The call tool.
-            name: The name of the tool.
-            args: The arguments of the tool.
+    for tool in tools:
+        coroutine = getattr(tool, "coroutine", None)
+        func = getattr(tool, "func", None)
 
-        Returns:
-            The result of the tool call.
-        """
-        raw_args = args if isinstance(args, dict) else {}
-        with opik.start_as_current_span(
-            name=name,
-            type="tool",
-            input=raw_args,
-            metadata={"provider": "github_mcp", "mocked": False},
-        ):
-            return await call_tool(name, raw_args)
+        if coroutine:
+            orig_coro = coroutine
 
-    return MCPServerStreamableHTTP(
-        "https://api.githubcopilot.com/mcp/",
-        timeout=60,
-        headers=headers,
-        process_tool_call=process_tool_call,
-    )
+            async def wrapped_coro(
+                *args: Any,
+                orig_coro: Any = orig_coro,
+                tool_name: str = tool.name,
+                **kwargs: Any,
+            ) -> Any:
+                raw_args = kwargs or (args[0] if args else {})
+                with opik.start_as_current_span(
+                    name=tool_name,
+                    type="tool",
+                    input=raw_args if isinstance(raw_args, dict) else {},
+                    metadata={"provider": "github_mcp", "mocked": False},
+                ):
+                    return await orig_coro(*args, **kwargs)
+
+            tool.coroutine = wrapped_coro  # type: ignore[attr-defined]
+        elif func:
+            orig_func = func
+
+            def wrapped_func(
+                *args: Any,
+                orig_func: Any = orig_func,
+                tool_name: str = tool.name,
+                **kwargs: Any,
+            ) -> Any:
+                raw_args = kwargs or (args[0] if args else {})
+                with opik.start_as_current_span(
+                    name=tool_name,
+                    type="tool",
+                    input=raw_args if isinstance(raw_args, dict) else {},
+                    metadata={"provider": "github_mcp", "mocked": False},
+                ):
+                    return orig_func(*args, **kwargs)
+
+            tool.func = wrapped_func  # type: ignore[attr-defined]
+
+    return tools

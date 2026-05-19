@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from pydantic_ai import FunctionToolset
+from langchain_core.tools import BaseTool, tool
 
 from agentic_sre.core.models import LogQueryResult
 from agentic_sre.eval.diagnosis_quality.mocks import cloudwatch as cloudwatch_mocks
@@ -10,11 +10,17 @@ from agentic_sre.eval.diagnosis_quality.mocks import slack as slack_mocks
 from agentic_sre.eval.diagnosis_quality.mocks.runtime import MockToolRuntime
 
 
-def build_mock_toolset(runtime: MockToolRuntime) -> FunctionToolset:
-    """Build mocked Slack and CloudWatch toolset."""
-    toolset = FunctionToolset()
+def build_mock_toolset(runtime: MockToolRuntime) -> list[BaseTool]:
+    """Build mocked Slack and CloudWatch toolset.
 
-    @toolset.tool
+    Args:
+        runtime: The mock tool runtime.
+
+    Returns:
+        List of mocked tools.
+    """
+
+    @tool
     async def conversations_add_message(
         channel_id: str,
         payload: str,
@@ -27,7 +33,7 @@ def build_mock_toolset(runtime: MockToolRuntime) -> FunctionToolset:
             thread_ts,
         )
 
-    @toolset.tool
+    @tool
     async def search_error_logs(
         log_group: str,
         service_name: str,
@@ -41,4 +47,4 @@ def build_mock_toolset(runtime: MockToolRuntime) -> FunctionToolset:
             time_range_minutes,
         )
 
-    return toolset
+    return [conversations_add_message, search_error_logs]
