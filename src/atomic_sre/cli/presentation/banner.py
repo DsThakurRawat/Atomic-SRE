@@ -2,6 +2,7 @@
 
 from importlib.metadata import PackageNotFoundError, version
 
+from rich.align import Align
 from rich.console import Group
 from rich.panel import Panel
 from rich.text import Text
@@ -28,27 +29,27 @@ def _build_banner() -> Panel:
         The styled Panel group.
     """
     ascii_art = get_ascii_art().strip("\n")
-    # spellchecker:ignore-next-line
-    banner_text = Text(justify="center")
-    banner_text.append("\n")
-    for line in ascii_art.splitlines():
-        if not line.strip():
-            banner_text.append("\n")
-            continue
-        banner_text.append(f"{line}\n", style="bold green")
 
-    banner_text.append(
+    # Left-align the ASCII art lines to keep formatting intact, but center the block
+    art_text = Text()
+    for line in ascii_art.splitlines():
+        art_text.append(f"{line}\n", style="bold green")
+    centered_art = Align.center(art_text)
+
+    # Subtitle text
+    subtitle_text = Text(justify="center")
+    subtitle_text.append(
         "\n🤖 Autonomous Multi-Agent AI Orchestration for SRE\n",
         style="bright_white",
     )
-    banner_text.append("Observe • Reason • Act • Heal\n", style="dim white")
-    banner_text.append("\n")
+    subtitle_text.append("Observe • Reason • Act • Heal\n", style="dim white")
+    subtitle_text.append("\n")
 
     footer_text = Text(justify="right")
     footer_text.append(f"v{_get_version()}\n", style="bold green")
     footer_text.append("Made by DIVYANSH RAWAT", style="dim white")
     return Panel(
-        Group(banner_text, footer_text),
+        Group(centered_art, subtitle_text, footer_text),
         title="Welcome to Atomic SRE",
         border_style="bold green",
         expand=True,

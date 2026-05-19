@@ -96,7 +96,34 @@ graph TD
 4. **Diagnose**: Produce high-fidelity diagnosis and fix suggestions.
 5. **Report**: Send results to Slack for human review.
 
-<img src="docs/imgs/flow.png" alt="flow" width="600">
+```mermaid
+graph LR
+    subgraph "High-Level SRE Flow"
+        1[Observe] -->|Read Logs| 2[Reason]
+        2 -->|Identify Service| 3[Act]
+        3 -->|Inspect GitHub MCP| 4[Diagnose]
+        4 -->|Create Fix Suggestions| 5[Report]
+        5 -->|Notify Slack| End([Review])
+    end
+
+    style 1 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
+    style 2 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
+    style 3 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
+    style 4 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
+    style 5 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
+    style End fill:#15803D,stroke:#166534,stroke-width:2px,color:#fff
+```
+
+# 🛠️ Technology Stack
+
+Atomic SRE is built using modern, production-ready AI agent frameworks:
+
+- **Core Runtime**: Python 3.13+
+- **Agent Orchestration**: [LangChain](https://github.com/langchain-ai/langchain) & [LangGraph](https://github.com/langchain-ai/langgraph) / [Deep Agents](https://github.com/langchain-ai/deepagents)
+- **MCP Client**: `MultiServerMCPClient` (from `langchain-mcp-adapters`) for dynamic tool invocation
+- **Evaluation & Tracing**: [Opik](https://github.com/comet-ml/opik) for automated span/trace capturing and dataset generation
+- **Logging & Infrastructure**: AWS CloudWatch (Logs client), Docker
+- **Remote Orchestration**: AWS ECS (deployment environment)
 
 # 🗺️ Integration Roadmap
 
@@ -175,4 +202,3 @@ If you want to run a direct diagnosis without the CLI:
 docker compose up -d slack
 uv run python -m atomic_sre.run /aws/containerinsights/no-loafers-for-you/application currencyservice 10
 ```
-# Atomic-SRE
