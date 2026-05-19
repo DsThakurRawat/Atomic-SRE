@@ -1,5 +1,5 @@
 [project]
-name = "agentic-sre"
+name = "atomic-sre"
 version = "0.2.1"
 description = "Flagship orchestration engine for the Autonomous Multi-Agent AI Organization, automating infrastructure monitoring, diagnosis, and self-healing."
 authors = [{ name = "DIVYANSH RAWAT", email = "divyanshrawatofficial@gmail.com" }]
@@ -27,9 +27,9 @@ dependencies = [
 ]
 
 [project.scripts]
-agentic-sre = "agentic_sre.cli.main:main"
-agentic-sre-run-tool-call-eval = "agentic_sre.eval.tool_call.run:main"
-agentic-sre-run-diagnosis-quality-eval = "agentic_sre.eval.diagnosis_quality.run:main"
+atomic-sre = "atomic_sre.cli.main:main"
+atomic-sre-run-tool-call-eval = "atomic_sre.eval.tool_call.run:main"
+atomic-sre-run-diagnosis-quality-eval = "atomic_sre.eval.diagnosis_quality.run:main"
 
 [build-system]
 requires = ["setuptools>=61.0"]

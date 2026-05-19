@@ -1,16 +1,16 @@
 <h1 align="center"> <!-- spellchecker:disable-line -->
-    🚀 Agentic SRE 🕵️‍♀️
+    🚀 Atomic SRE 🕵️‍♀️
 </h1>
 
 <p align="center">
-  <img src="docs/imgs/banner.png" alt="Agentic SRE Banner" width="800">
+  <img src="docs/imgs/banner.png" alt="Atomic SRE Banner" width="800">
 </p>
 
 <p align="center">
     <strong>Flagship Orchestration Engine for the Autonomous Multi-Agent AI Organization</strong>
 </p>
 
-Welcome to **Agentic SRE**. This is a premium, open-source multi-agent orchestration engine designed to automate the heavy lifting of Site Reliability Engineering. It coordinates specialized autonomous agents to monitor logs, diagnose production issues, and execute root-cause fixes across distributed systems.
+Welcome to **Atomic SRE**. This is a premium, open-source multi-agent orchestration engine designed to automate the heavy lifting of Site Reliability Engineering. It coordinates specialized autonomous agents to monitor logs, diagnose production issues, and execute root-cause fixes across distributed systems.
 
 <p align="center"> <!-- spellchecker:disable-line -->
   <img src="docs/imgs/demo.gif" alt="flow" width="500">
@@ -23,14 +23,14 @@ Welcome to **Agentic SRE**. This is a premium, open-source multi-agent orchestra
 - Python 3.13+
 - [Docker](https://docs.docker.com/get-docker/) (required for local mode)
 
-## 1️⃣ Install Agentic SRE
+## 1️⃣ Install Atomic SRE
 ```bash
-pip install agentic-sre
+pip install atomic-sre
 ```
 
 ## 2️⃣ Start the CLI
 ```bash
-agentic-sre
+atomic-sre
 ```
 
 On first run, the setup wizard will guide you through configuration:
@@ -64,7 +64,7 @@ This is the local shell view:
 
 # 🌟 What Does It Do?
 
-Think about a microservice app where any service can fail at any time. **Agentic SRE** watches error logs, identifies which service is affected, checks the configured GitHub repository, diagnoses likely root causes, suggests fixes, and reports back to Slack.
+Think about a microservice app where any service can fail at any time. **Atomic SRE** watches error logs, identifies which service is affected, checks the configured GitHub repository, diagnoses likely root causes, suggests fixes, and reports back to Slack.
 
 In short, it handles the heavy lifting so your team can focus on fixing the issue quickly.
 
@@ -72,11 +72,11 @@ Your application can run on Kubernetes, ECS, VMs, or elsewhere. The key requirem
 
 # 🏛️ Architecture
 
-Agentic SRE operates as a sophisticated state machine, coordinating between logging platforms, source code repositories, and communication channels.
+Atomic SRE operates as a sophisticated state machine, coordinating between logging platforms, source code repositories, and communication channels.
 
 ```mermaid
 graph TD
-    A[CloudWatch Logs] --> B{Agentic SRE}
+    A[CloudWatch Logs] --> B{Atomic SRE}
     B --> C[GitHub MCP]
     C --> B
     B --> D[Diagnosis & Fix Suggestions]
@@ -128,21 +128,21 @@ graph TD
 - [x] AWS ECS
 
 > [!TIP]
-> Looking for a feature or integration that is not listed yet? Open a [Feature / Integration request](https://github.com/DsThakurRawat/Agentic-SRE/issues/new?template=feature_or_integration_request.yml) 🚀
+> Looking for a feature or integration that is not listed yet? Open a [Feature / Integration request](https://github.com/DsThakurRawat/Atomic-SRE/issues/new?template=feature_or_integration_request.yml) 🚀
 
 # 🧪 Evaluation
 
 We built a comprehensive evaluation suite to test both tool-use behaviour and diagnosis quality.
 
-- [Evaluation overview](src/agentic_sre/eval/README.md)
-- [Tool call evaluation](src/agentic_sre/eval/tool_call/README.md)
-- [Diagnosis quality evaluation](src/agentic_sre/eval/diagnosis_quality/README.md)
+- [Evaluation overview](src/atomic_sre/eval/README.md)
+- [Tool call evaluation](src/atomic_sre/eval/tool_call/README.md)
+- [Diagnosis quality evaluation](src/atomic_sre/eval/diagnosis_quality/README.md)
 
 Run the suites with:
 
 ```bash
-uv run agentic-sre-run-tool-call-eval
-uv run agentic-sre-run-diagnosis-quality-eval
+uv run atomic-sre-run-tool-call-eval
+uv run atomic-sre-run-diagnosis-quality-eval
 ```
 
 # 🤔 Why We Built This
@@ -166,13 +166,13 @@ uv sync --dev
 Run the interactive CLI locally:
 
 ```bash
-uv run agentic-sre
+uv run atomic-sre
 ```
 
 If you want to run a direct diagnosis without the CLI:
 
 ```bash
 docker compose up -d slack
-uv run python -m agentic_sre.run /aws/containerinsights/no-loafers-for-you/application currencyservice 10
+uv run python -m atomic_sre.run /aws/containerinsights/no-loafers-for-you/application currencyservice 10
 ```
-# Agentic-SRE
+# Atomic-SRE

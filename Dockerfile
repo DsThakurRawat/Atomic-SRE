@@ -1,4 +1,4 @@
-# Agentic SRE Container
+# Atomic SRE Container
 # Multi-stage build for smaller image size
 
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
@@ -34,4 +34,4 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Run one diagnosis job and then exit
-CMD ["python", "-m", "agentic_sre.run"]
+CMD ["python", "-m", "atomic_sre.run"]
