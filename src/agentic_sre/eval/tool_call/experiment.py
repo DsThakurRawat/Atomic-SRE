@@ -7,7 +7,6 @@ import opik
 from opik import Opik
 from opik.evaluation import evaluate
 from opik.evaluation.evaluation_result import EvaluationResult
-from pydantic_ai import Agent
 
 from agentic_sre.core.models import ErrorDiagnosis
 from agentic_sre.core.prompts import SYSTEM_PROMPT
@@ -87,14 +86,28 @@ async def run_case(case: ToolCallEvalCase) -> dict[str, Any]:
         An empty dictionary, we will extract tool usage from the span tree.
     """
     runtime = MockToolRuntime(case)
-    github_toolset = build_github_toolset()
+    github_tools = await build_github_toolset()
+    mock_tools = build_mock_toolset(runtime)
 
-    agent = Agent(
-        DEFAULT_MODEL,
+    tools = []
+    tools.extend(mock_tools)
+    tools.extend(github_tools)
+
+    from deepagents import create_deep_agent
+
+    from agentic_sre.core.agent import _get_model
+    from agentic_sre.core.settings import get_settings
+
+    config = get_settings()
+    config.model = DEFAULT_MODEL
+    model = _get_model(config)
+
+    agent = create_deep_agent(
+        model=model,
+        tools=tools,
         system_prompt=SYSTEM_PROMPT,
-        output_type=ErrorDiagnosis,
-        toolsets=[build_mock_toolset(runtime), github_toolset],
+        response_format=ErrorDiagnosis,
     )
 
-    await agent.run(render_agent_prompt(case))
-    return {}  # Must return a dictionary for Opik
+    await agent.ainvoke({"messages": [{"role": "user", "content": render_agent_prompt(case)}]})
+    return {}

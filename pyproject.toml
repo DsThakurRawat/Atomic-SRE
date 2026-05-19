@@ -17,7 +17,10 @@ dependencies = [
     "langgraph>=0.2.70",
     "langchain-openai>=0.3.5",
     "langchain-anthropic>=0.3.6",
-    "pydantic-ai>=0.0.14",
+    "deepagents",
+    "langchain-mcp-adapters",
+    "langchain-aws",
+    "opik",
     "questionary>=2.0.1",
     "platformdirs>=4.2.0",
 ]

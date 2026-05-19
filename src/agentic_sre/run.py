@@ -14,8 +14,8 @@ load_dotenv(env_path())
 
 # Configure logging to see tool calls and agent thoughts
 logging.basicConfig(level=logging.INFO)
-# Set pydantic_ai to INFO to see agent activity
-logging.getLogger("pydantic_ai").setLevel(logging.INFO)
+# Set logger to INFO to see agent activity
+logging.getLogger("deepagents").setLevel(logging.INFO)
 
 
 def _load_request_from_args_or_env() -> tuple[str, str, int]:

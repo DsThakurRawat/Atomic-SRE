@@ -12,18 +12,18 @@ from agentic_sre.cli.configuration.options import (
     DEPLOYMENT_PLATFORM_AWS,
     DEPLOYMENT_PLATFORM_CHOICES,
     LEGACY_SELECTION_ENV_KEYS,
+    MODEL_CHOICES_ANTHROPIC,
+    MODEL_CHOICES_GEMINI,
+    MODEL_CHOICES_GROQ,
+    MODEL_CHOICES_OPENAI,
     MODEL_PROVIDER_ANTHROPIC,
+    MODEL_PROVIDER_BEDROCK,
+    MODEL_PROVIDER_CHOICES,
+    MODEL_PROVIDER_GEMINI,
     MODEL_PROVIDER_GROQ,
     MODEL_PROVIDER_OLLAMA,
     MODEL_PROVIDER_OPENAI,
-    MODEL_PROVIDER_GEMINI,
     MODEL_PROVIDER_OPENROUTER,
-    MODEL_PROVIDER_BEDROCK,
-    MODEL_PROVIDER_CHOICES,
-    MODEL_CHOICES_ANTHROPIC,
-    MODEL_CHOICES_GROQ,
-    MODEL_CHOICES_OPENAI,
-    MODEL_CHOICES_GEMINI,
     NOTIFICATION_PLATFORM_CHOICES,
     NOTIFICATION_PLATFORM_SLACK,
 )
@@ -266,10 +266,10 @@ def _configure_model_provider(
         MODEL_PROVIDER_OPENAI: MODEL_CHOICES_OPENAI,
         MODEL_PROVIDER_GEMINI: MODEL_CHOICES_GEMINI,
     }
-    
+
     current_model = env_values.get("MODEL") or config.integrations.model
     choices = model_choices_map.get(model_provider)
-    
+
     if choices:
         # Add 'Custom' option to the list
         all_choices = list(choices) + [("Custom (type your own)", "custom")]

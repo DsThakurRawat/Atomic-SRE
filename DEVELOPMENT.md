@@ -29,31 +29,29 @@ When adding a new tool/integration, follow one of these patterns:
 
 ### Option 1: MCP Server
 
-If an MCP server exists for the service, you can use that. No interface implementation is needed.
+If an MCP server exists for the service, you can configure it inside the `connections` dictionary in `agent.py` to be loaded dynamically by `MultiServerMCPClient`.
 
 ```python
-# tools/example.py
-from pydantic_ai.mcp import MCPServerStdio
-from agentic_sre.core.settings import AgentSettings
-
-def create_example_mcp_toolset(config: AgentSettings) -> MCPServerStdio:
-    return MCPServerStdio(
-        "docker",
-        args=["run", "-i", "--rm", "-e", f"TOKEN={config.example.token}", "mcp/example"],
-        timeout=30,
-    )
+# In src/agentic_sre/core/agent.py:
+connections = {
+    "example": {
+        "transport": "stdio",  # or "sse" / "streamable_http"
+        "command": "docker",
+        "args": ["run", "-i", "--rm", "-e", f"TOKEN={config.example.token}", "mcp/example"],
+    }
+}
 ```
-
-**Examples:** `github.py`, `slack.py`
 
 ### Option 2: Direct API
 
-Use this when no MCP server is available. You must implement the relevant interface.
+Use this when no MCP server is available. You must implement the relevant interface and register the tool using standard LangChain `@tool` decoration.
 
 ```python
 # tools/example.py
-from agentic_sre.interfaces import LoggingInterface
-from agentic_sre.models import LogQueryResult
+from langchain_core.tools import tool
+from agentic_sre.core.interfaces import LoggingInterface
+from agentic_sre.core.models import LogQueryResult
+from agentic_sre.core.settings import AgentSettings
 
 class ExampleLogging(LoggingInterface):
     async def query_errors(
@@ -65,15 +63,19 @@ class ExampleLogging(LoggingInterface):
         # Implementation using direct API calls
         ...
 
-def create_example_toolset(config: AgentSettings) -> FunctionToolset:
-    toolset = FunctionToolset()
+def create_example_toolset(config: AgentSettings) -> list:
     impl = ExampleLogging(config.example.api_key)
 
-    @toolset.tool
-    async def search_logs(...) -> LogQueryResult:
-        return await impl.query_errors(...)
+    @tool
+    async def search_logs(
+        log_group: str,
+        service_name: str,
+        time_range_minutes: int = 10,
+    ) -> LogQueryResult:
+        """Search logs for errors."""
+        return await impl.query_errors(log_group, service_name, time_range_minutes)
 
-    return toolset
+    return [search_logs]
 ```
 
 **Examples:** `cloudwatch.py`

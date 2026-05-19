@@ -6,7 +6,7 @@ from typing import Any
 
 import boto3
 from botocore.exceptions import ClientError
-from pydantic_ai import FunctionToolset
+from langchain_core.tools import BaseTool, tool
 
 from agentic_sre.core.interfaces import LoggingInterface
 from agentic_sre.core.models import LogEntry, LogQueryResult
@@ -96,12 +96,18 @@ class CloudWatchLogging(LoggingInterface):
         return entries
 
 
-def create_cloudwatch_toolset(config: AgentSettings) -> FunctionToolset:
-    """Create a FunctionToolset with CloudWatch tools for pydantic-ai."""
-    toolset = FunctionToolset()
+def create_cloudwatch_toolset(config: AgentSettings) -> list[BaseTool]:
+    """Create a list of CloudWatch tools.
+
+    Args:
+        config: Agent settings.
+
+    Returns:
+        List of configured CloudWatch tools.
+    """
     cw_logging = CloudWatchLogging(region=config.aws.region)
 
-    @toolset.tool
+    @tool
     async def search_error_logs(
         log_group: str,
         service_name: str,
@@ -110,13 +116,13 @@ def create_cloudwatch_toolset(config: AgentSettings) -> FunctionToolset:
         """Search CloudWatch logs for errors.
 
         Args:
-            log_group: The CloudWatch log group name
-            service_name: Service name to filter log entries (e.g., 'cartservice')
-            time_range_minutes: How far back to search (default: 10 minutes)
+            log_group: The CloudWatch log group name.
+            service_name: Service name to filter log entries.
+            time_range_minutes: How far back to search.
 
         Returns:
-            LogQueryResult containing matching error log entries
+            LogQueryResult containing matching error log entries.
         """
         return await cw_logging.query_errors(log_group, service_name, time_range_minutes)
 
-    return toolset
+    return [search_error_logs]

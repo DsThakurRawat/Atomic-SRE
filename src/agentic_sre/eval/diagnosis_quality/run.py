@@ -1,7 +1,5 @@
 """Run diagnosis quality evaluation."""
 
-from pydantic_ai.exceptions import UserError
-
 from agentic_sre.eval.diagnosis_quality.config import DEFAULT_EXPERIMENT_NAME
 from agentic_sre.eval.diagnosis_quality.dataset.create_and_populate import DEFAULT_DATASET_NAME
 from agentic_sre.eval.diagnosis_quality.experiment import run_experiment
@@ -11,7 +9,7 @@ def main() -> None:
     """Run diagnosis quality evaluation with default configuration."""
     try:
         result = run_experiment()
-    except UserError as exc:
+    except ValueError as exc:
         print("Model configuration error for eval run.")
         print("Set the provider API key for the configured model before running the eval.")
         raise SystemExit(1) from exc
