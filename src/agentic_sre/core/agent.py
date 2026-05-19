@@ -184,6 +184,7 @@ async def create_agentic_sre(config: AgentSettings) -> Any:
 
     # Register fallback Slack tool if the MCP server is down or unconfigured
     if not has_slack:
+
         @tool
         async def conversations_add_message(
             channel_id: str,

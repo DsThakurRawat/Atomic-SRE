@@ -22,3 +22,7 @@ def cli(ctx: click.Context) -> None:
 def main() -> None:
     """Run the CLI."""
     cli()
+
+
+if __name__ == "__main__":
+    main()
