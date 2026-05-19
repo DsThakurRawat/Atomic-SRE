@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  <img src="docs/imgs/banner.png" alt="Atomic SRE Banner" width="800">
+  <img src="docs/imgs/banner-v2.png" alt="Atomic SRE Banner" width="800">
 </p>
 
 <p align="center">
