@@ -1,13 +1,13 @@
-# Docker Compose for Agentic SRE and MCP server sidecars.
+# Docker Compose for Atomic SRE and MCP server sidecars.
 #
 # Start with: docker compose up -d
-# Logs: docker compose logs -f agentic-sre
+# Logs: docker compose logs -f atomic-sre
 
-name: agentic-sre
+name: atomic-sre
 
 services:
-  # Agentic SRE
-  agentic-sre:
+  # Atomic SRE
+  atomic-sre:
     build:
       context: .
       dockerfile: Dockerfile
