@@ -1,1 +1,1 @@
-"""Tests package for the Agentic SRE."""
+"""Tests package for the Atomic SRE."""
