@@ -1,5 +1,5 @@
 <h1 align="center"> <!-- spellchecker:disable-line -->
-    🚀 Atomic SRE 🕵️‍♀️
+    Atomic SRE
 </h1>
 
 <p align="center">
@@ -12,34 +12,30 @@
 
 Welcome to **Atomic SRE**. This is a premium, open-source multi-agent orchestration engine designed to automate the heavy lifting of Site Reliability Engineering. It coordinates specialized autonomous agents to monitor logs, diagnose production issues, and execute root-cause fixes across distributed systems.
 
-<p align="center"> <!-- spellchecker:disable-line -->
-  <img src="docs/imgs/demo.gif" alt="flow" width="500">
-</p>
-
-# 🏃 Quick Start
+# Quick Start
 
 ## Prerequisites
 
 - Python 3.13+
 - [Docker](https://docs.docker.com/get-docker/) (required for local mode)
 
-## 1️⃣ Install Atomic SRE
+## 1. Install Atomic SRE
 
 You can install Atomic SRE using one of the following methods:
 
-### Option A: Direct Installer (via `curl` - Recommended for developers)
+### Option A: Direct Installer (via curl - Recommended for developers)
 This automatically verifies prerequisites, installs the `uv` package manager, clones the repository, and configures all dependencies:
 ```bash
 curl -sSL https://raw.githubusercontent.com/DsThakurRawat/Atomic-SRE/main/install.sh | bash
 ```
 
-### Option B: Python Package Manager (via `pip`)
+### Option B: Python Package Manager (via pip)
 If you want to install the package directly from PyPI:
 ```bash
 pip install atomic-sre
 ```
 
-## 2️⃣ Start the CLI
+## 2. Start the CLI
 
 Depending on your installation method:
 
@@ -56,9 +52,9 @@ On first run, the setup wizard will guide you through configuration:
 
 ![cli-setup](docs/imgs/cli-setup.png)
 
-## 3️⃣ Provide the required setup values
+## 3. Provide Required Setup Values
 
-The wizard currently asks for:
+The wizard asks for:
 
 - `ANTHROPIC_API_KEY`
 - `GITHUB_PERSONAL_ACCESS_TOKEN`
@@ -68,7 +64,21 @@ The wizard currently asks for:
 
 By default the agent uses `claude-sonnet-4-5-20250929`. You can override this by setting the `MODEL` environment variable.
 
-## 4️⃣ Pick a running mode
+### AWS Permissions
+To run in Local mode, your AWS credentials must have permissions to query CloudWatch Logs. An IAM policy with the following permissions is required:
+- `logs:DescribeLogGroups`
+- `logs:FilterLogEvents`
+- `logs:GetLogEvents`
+
+### Evaluation and Tracing
+To enable tracing with Opik, configure:
+```bash
+export OPIK_API_KEY="your-opik-api-key"
+# Optionally override workspace
+# export OPIK_WORKSPACE="your-workspace"
+```
+
+## 4. Choose a Running Mode
 
 After setup, the CLI gives you two modes:
 
@@ -81,7 +91,7 @@ This is the local shell view:
 
 ![cli-home](docs/imgs/cli-home.png)
 
-# 🌟 What Does It Do?
+# What Does It Do?
 
 Think about a microservice app where any service can fail at any time. **Atomic SRE** watches error logs, identifies which service is affected, checks the configured GitHub repository, diagnoses likely root causes, suggests fixes, and reports back to Slack.
 
@@ -89,7 +99,7 @@ In short, it handles the heavy lifting so your team can focus on fixing the issu
 
 Your application can run on Kubernetes, ECS, VMs, or elsewhere. The key requirement is that logs are available in CloudWatch.
 
-# 🏛️ Architecture
+# Architecture
 
 Atomic SRE operates as a sophisticated state machine, coordinating between logging platforms, source code repositories, and communication channels.
 
@@ -133,7 +143,7 @@ graph LR
     style End fill:#15803D,stroke:#166534,stroke-width:2px,color:#fff
 ```
 
-# 🛠️ Technology Stack
+# Technology Stack
 
 Atomic SRE is built using modern, production-ready AI agent frameworks:
 
@@ -144,7 +154,7 @@ Atomic SRE is built using modern, production-ready AI agent frameworks:
 - **Logging & Infrastructure**: AWS CloudWatch (Logs client), Docker
 - **Remote Orchestration**: AWS ECS (deployment environment)
 
-# 📁 Project Structure
+# Project Structure
 
 Here is the folder structure of the `Atomic-SRE` project workspace:
 
@@ -165,39 +175,39 @@ Atomic-SRE/
 └── DEVELOPMENT.md        # Technical developer guide
 ```
 
-# 🗺️ Integration Roadmap
+# Integration Roadmap
 
-#### 🧠 Model provider
+#### Model provider
 
 - [x] Anthropic
 - [ ] vLLM
 - [ ] OpenAI
 
-#### 🪵 Logging platform
+#### Logging platform
 
 - [x] AWS CloudWatch
 - [ ] Google Cloud Observability
 - [ ] Azure Monitor
 
-#### 🏢 Remote code repository
+#### Remote code repository
 
 - [x] GitHub
 - [ ] GitLab
 - [ ] Bitbucket
 
-#### 🔔 Notification channel
+#### Notification channel
 
 - [x] Slack
 - [ ] Microsoft Teams
 
-#### 🕶️ Remote deployment mode:
+#### Remote deployment mode:
 
 - [x] AWS ECS
 
 > [!TIP]
-> Looking for a feature or integration that is not listed yet? Open a [Feature / Integration request](https://github.com/DsThakurRawat/Atomic-SRE/issues/new?template=feature_or_integration_request.yml) 🚀
+> Looking for a feature or integration that is not listed yet? Open a [Feature / Integration request](https://github.com/DsThakurRawat/Atomic-SRE/issues/new?template=feature_or_integration_request.yml)
 
-# 🧪 Evaluation
+# Evaluation
 
 We built a comprehensive evaluation suite to test both tool-use behaviour and diagnosis quality.
 
@@ -212,7 +222,7 @@ uv run atomic-sre-run-tool-call-eval
 uv run atomic-sre-run-diagnosis-quality-eval
 ```
 
-# 🤔 Why We Built This
+# Why We Built This
 
 We wanted to learn practical best practices for running AI agents in production: cost, safety, observability, and evaluation. We are sharing the journey in the open and publishing what we learn as we go.
 
@@ -220,7 +230,7 @@ We also write about this work on the [DIVYANSH RAWAT blog](https://www.DsThakurR
 
 > **Contributions welcome.** [Join us](CONTRIBUTING.md) and help shape the future of AI-powered SRE.
 
-# 🔧 For Developers
+# For Developers
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for the full local setup guide.
 
