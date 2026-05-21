@@ -58,6 +58,7 @@ def _require_key(key: str | None, env_var: str, provider: str) -> None:
             "Set it in your .env file or environment."
         )
 
+
 def _get_model(config: AgentSettings) -> BaseChatModel:
     """Resolve the LangChain model object from configuration.
 
@@ -182,7 +183,13 @@ async def _load_mcp_tools(config: AgentSettings) -> list[BaseTool]:
                 tools = cast(list[BaseTool], await client.get_tools())
                 mcp_tools.extend(tools)
         except Exception as e:  # noqa: BLE001
-            logger.warning("Could not connect to %s MCP server: %s. Skipping %s tools.", name, e, name)
+            logger.warning(
+                "Could not connect to %s MCP server: %s. Skipping %s tools.",
+                name,
+                e,
+                name,
+                exc_info=True,
+            )
     return mcp_tools
 
 
