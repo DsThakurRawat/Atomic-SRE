@@ -72,7 +72,7 @@ class CloudWatchLogging(LoggingInterface):
         except ClientError as e:
             logger.error(f"CloudWatch query failed: {e}")
             raise RuntimeError(f"Failed to query CloudWatch: {e}") from e
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Unexpected error: {e}")
             raise RuntimeError(f"Unexpected error querying logs: {e}") from e
 
