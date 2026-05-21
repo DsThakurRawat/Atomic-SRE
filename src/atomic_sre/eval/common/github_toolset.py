@@ -42,42 +42,40 @@ async def build_github_toolset() -> list[BaseTool]:
         func = getattr(tool, "func", None)
 
         if coroutine:
-            orig_coro = coroutine
-
-            async def wrapped_coro(
-                *args: Any,
-                orig_coro: Any = orig_coro,
-                tool_name: str = tool.name,
-                **kwargs: Any,
-            ) -> Any:
-                raw_args = kwargs or (args[0] if args else {})
-                with opik.start_as_current_span(
-                    name=tool_name,
-                    type="tool",
-                    input=raw_args if isinstance(raw_args, dict) else {},
-                    metadata={"provider": "github_mcp", "mocked": False},
-                ):
-                    return await orig_coro(*args, **kwargs)
-
-            tool.coroutine = wrapped_coro  # type: ignore[attr-defined]
+            tool.coroutine = _make_traced_coro(coroutine, tool.name)  # type: ignore[attr-defined]
         elif func:
-            orig_func = func
-
-            def wrapped_func(
-                *args: Any,
-                orig_func: Any = orig_func,
-                tool_name: str = tool.name,
-                **kwargs: Any,
-            ) -> Any:
-                raw_args = kwargs or (args[0] if args else {})
-                with opik.start_as_current_span(
-                    name=tool_name,
-                    type="tool",
-                    input=raw_args if isinstance(raw_args, dict) else {},
-                    metadata={"provider": "github_mcp", "mocked": False},
-                ):
-                    return orig_func(*args, **kwargs)
-
-            tool.func = wrapped_func  # type: ignore[attr-defined]
+            tool.func = _make_traced_func(func, tool.name)  # type: ignore[attr-defined]
 
     return tools
+
+
+def _make_traced_coro(coro: Any, name: str) -> Any:
+    """Create an async wrapper that adds an Opik span around a coroutine."""
+
+    async def wrapped(*args: Any, **kwargs: Any) -> Any:
+        raw_args = kwargs or (args[0] if args else {})
+        with opik.start_as_current_span(
+            name=name,
+            type="tool",
+            input=raw_args if isinstance(raw_args, dict) else {},
+            metadata={"provider": "github_mcp", "mocked": False},
+        ):
+            return await coro(*args, **kwargs)
+
+    return wrapped
+
+
+def _make_traced_func(func: Any, name: str) -> Any:
+    """Create a sync wrapper that adds an Opik span around a function."""
+
+    def wrapped(*args: Any, **kwargs: Any) -> Any:
+        raw_args = kwargs or (args[0] if args else {})
+        with opik.start_as_current_span(
+            name=name,
+            type="tool",
+            input=raw_args if isinstance(raw_args, dict) else {},
+            metadata={"provider": "github_mcp", "mocked": False},
+        ):
+            return func(*args, **kwargs)
+
+    return wrapped
