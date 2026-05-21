@@ -37,7 +37,15 @@ fi
 # Synchronize dependencies and install CLI globally
 echo "⚡ Syncing dependencies and installing CLI globally with uv..."
 uv sync
-uv tool install --force .
+
+# Create a fast global wrapper script instead of a slow full tool installation
+echo "🚀 Creating fast global CLI wrapper..."
+mkdir -p "$HOME/.local/bin"
+cat << EOF > "$HOME/.local/bin/atomic-sre"
+#!/bin/bash
+cd "$(pwd)" && uv run atomic-sre "\$@"
+EOF
+chmod +x "$HOME/.local/bin/atomic-sre"
 
 echo "✅ Atomic SRE installed successfully!"
 echo ""
