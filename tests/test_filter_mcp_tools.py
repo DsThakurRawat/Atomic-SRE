@@ -41,6 +41,9 @@ class TestFilterMcpTools:
         ]
         filtered, _ = _filter_mcp_tools(tools)
         assert len(filtered) == 2
+        names = {t.name for t in filtered}
+        assert "search_code" in names
+        assert "get_file_contents" in names
 
     def test_empty_input_returns_empty(self) -> None:
         """Empty tool list should return empty results."""
