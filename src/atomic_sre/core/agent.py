@@ -154,14 +154,14 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
     return model_obj
 
 
-async def _load_mcp_tools(config: AgentSettings) -> list[BaseTool]:
+async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
     """Load tools dynamically from Slack and GitHub MCP servers.
 
     Args:
         config: Agent settings.
 
     Returns:
-        List of loaded MCP tools.
+        Tuple of loaded MCP tools and a boolean indicating if Slack tools are available.
     """
     connections = {}
     if config.github.mcp_url:
@@ -177,12 +177,15 @@ async def _load_mcp_tools(config: AgentSettings) -> list[BaseTool]:
         }
 
     mcp_tools: list[BaseTool] = []
+    any_slack = False
     for name, conn in connections.items():
         try:
             async with MultiServerMCPClient({name: conn}) as client:
                 tools = cast(list[BaseTool], await client.get_tools())
-                filtered_tools, _ = _filter_mcp_tools(tools)
+                filtered_tools, has_slack = _filter_mcp_tools(tools)
                 mcp_tools.extend(filtered_tools)
+                if has_slack:
+                    any_slack = True
         except Exception as e:  # noqa: BLE001
             logger.warning(
                 "Could not connect to %s MCP server: %s. Skipping %s tools.",
@@ -190,7 +193,7 @@ async def _load_mcp_tools(config: AgentSettings) -> list[BaseTool]:
                 e,
                 name,
             )
-    return mcp_tools
+    return mcp_tools, any_slack
 
 
 def _filter_mcp_tools(mcp_tools: list[BaseTool]) -> tuple[list[BaseTool], bool]:
@@ -226,8 +229,7 @@ async def create_atomic_sre(config: AgentSettings) -> Any:
     Returns:
         The compiled deep agent.
     """
-    mcp_tools = await _load_mcp_tools(config)
-    filtered_tools, has_slack = _filter_mcp_tools(mcp_tools)
+    filtered_tools, has_slack = await _load_mcp_tools(config)
 
     # Register fallback Slack tool if the MCP server is down or unconfigured
     if not has_slack:
