@@ -49,9 +49,9 @@ class CloudWatchLogging(LoggingInterface):
             "}"
         )
 
-        logger.debug("CloudWatch filter pattern: %s", filter_pattern)
-        logger.debug("Log Group: %s", source)
-        logger.debug("Time Range: %s to %s", start_time, end_time)
+        logger.info(f"CloudWatch filter pattern: {filter_pattern}")
+        logger.info(f"Log Group: {source}")
+        logger.info(f"Time Range: {start_time} to {end_time}")
 
         try:
             response = self._client.filter_log_events(
@@ -62,7 +62,7 @@ class CloudWatchLogging(LoggingInterface):
                 limit=20,
             )
             entries = self._parse_events(response.get("events", []))
-            logger.debug("Found %d log entries", len(entries))
+            logger.info(f"Found {len(entries)} log entries")
 
             return LogQueryResult(
                 entries=entries,
@@ -70,10 +70,10 @@ class CloudWatchLogging(LoggingInterface):
                 query=filter_pattern,
             )
         except ClientError as e:
-            logger.error("CloudWatch query failed: %s", e)
+            logger.error(f"CloudWatch query failed: {e}")
             raise RuntimeError(f"Failed to query CloudWatch: {e}") from e
         except Exception as e:  # noqa: BLE001
-            logger.exception("Unexpected error querying logs")
+            logger.error(f"Unexpected error: {e}")
             raise RuntimeError("Unexpected error querying logs") from e
 
     def _parse_events(self, events: list[dict[str, Any]]) -> list[LogEntry]:
