@@ -28,6 +28,9 @@ services:
       # GitHub MCP (Remote)
       - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_PERSONAL_ACCESS_TOKEN}
       - GITHUB_MCP_URL=https://api.githubcopilot.com/mcp/
+      - GITHUB_OWNER=${GITHUB_OWNER}
+      - GITHUB_REPO=${GITHUB_REPO}
+      - GITHUB_REF=${GITHUB_REF:-main}
     depends_on:
       slack:
         condition: service_started

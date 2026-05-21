@@ -182,7 +182,7 @@ async def _load_mcp_tools(config: AgentSettings) -> list[BaseTool]:
                 tools = cast(list[BaseTool], await client.get_tools())
                 mcp_tools.extend(tools)
         except Exception as e:  # noqa: BLE001
-            logger.warning(f"Could not connect to {name} MCP server: {e}. Skipping {name} tools.")
+            logger.warning("Could not connect to %s MCP server: %s. Skipping %s tools.", name, e, name)
     return mcp_tools
 
 
@@ -233,7 +233,10 @@ async def create_atomic_sre(config: AgentSettings) -> Any:
         ) -> dict[str, Any]:
             """Post message to Slack. Used for starting and posting final findings."""
             logger.warning(
-                f"[Fallback Slack] Post to channel {channel_id}: {payload} (thread: {thread_ts})"
+                "[Fallback Slack] Post to channel %s: %s (thread: %s)",
+                channel_id,
+                payload,
+                thread_ts,
             )
             return {"status": "ok", "message": "Logged to console (Slack MCP unavailable)"}
 
