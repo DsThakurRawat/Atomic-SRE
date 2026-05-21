@@ -74,7 +74,7 @@ class CloudWatchLogging(LoggingInterface):
             raise RuntimeError(f"Failed to query CloudWatch: {e}") from e
         except Exception as e:  # noqa: BLE001
             logger.exception("Unexpected error querying logs")
-            raise RuntimeError(f"Unexpected error querying logs: {e}") from e
+            raise RuntimeError("Unexpected error querying logs") from e
 
     def _parse_events(self, events: list[dict[str, Any]]) -> list[LogEntry]:
         """Parse filter_log_events entries into LogEntry objects."""
