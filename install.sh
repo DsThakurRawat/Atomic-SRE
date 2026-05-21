@@ -34,12 +34,15 @@ else
     git pull origin main
 fi
 
-# Synchronize dependencies
-echo "⚡ Syncing dependencies with uv..."
+# Synchronize dependencies and install CLI globally
+echo "⚡ Syncing dependencies and installing CLI globally with uv..."
 uv sync
+uv tool install --force .
 
 echo "✅ Atomic SRE installed successfully!"
 echo ""
-echo "To launch the guided CLI deployment shell, run:"
-echo "  cd $(pwd) && uv run atomic-sre"
+echo "You can now run it directly from anywhere:"
+echo "  atomic-sre"
+echo ""
+echo "(Note: Ensure ~/.local/bin is in your PATH if the command is not found)"
 echo ""
