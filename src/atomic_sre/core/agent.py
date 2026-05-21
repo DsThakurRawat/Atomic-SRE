@@ -19,6 +19,44 @@ from atomic_sre.core.tools import create_cloudwatch_toolset
 
 logger = logging.getLogger(__name__)
 
+_MODEL_PREFIX_MAP = {
+    "claude": "anthropic",
+    "gpt": "openai",
+    "o1": "openai",
+    "o3": "openai",
+    "o4": "openai",
+    "gemini": "google-gla",
+}
+
+
+def _infer_provider(model_name: str) -> str:
+    """Infer the provider from a model name prefix.
+
+    Args:
+        model_name: The model identifier without a provider prefix.
+
+    Returns:
+        The inferred provider string, defaulting to 'openai'.
+    """
+    for prefix, provider in _MODEL_PREFIX_MAP.items():
+        if model_name.startswith(prefix):
+            return provider
+    return "openai"
+
+
+def _require_key(key: str | None, env_var: str, provider: str) -> None:
+    """Raise if an API key is missing.
+
+    Args:
+        key: The API key value.
+        env_var: Name of the environment variable for the error message.
+        provider: Provider name for the error message.
+    """
+    if not key:
+        raise ValueError(
+            f"{env_var} is required for the '{provider}' provider. "
+            "Set it in your .env file or environment."
+        )
 
 def _get_model(config: AgentSettings) -> BaseChatModel:
     """Resolve the LangChain model object from configuration.
@@ -35,6 +73,8 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
 
     if ":" in model_id:
         provider, base_model = model_id.split(":", 1)
+    else:
+        provider = _infer_provider(base_model)
 
     model_obj: BaseChatModel
 
@@ -57,12 +97,12 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
             ),
         )
     elif provider == "anthropic":
-        api_key = SecretStr(config.anthropic_api_key or "")
+        _require_key(config.anthropic_api_key, "ANTHROPIC_API_KEY", "anthropic")
         model_obj = cast(
             BaseChatModel,
             ChatAnthropic(
                 model_name=base_model,
-                api_key=api_key,
+                api_key=SecretStr(config.anthropic_api_key or ""),
                 timeout=None,
                 stop=None,
             ),
@@ -70,43 +110,43 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
     elif provider == "groq":
         from langchain_groq import ChatGroq
 
-        api_key = SecretStr(config.groq_api_key or "")
+        _require_key(config.groq_api_key, "GROQ_API_KEY", "groq")
         model_obj = cast(
             BaseChatModel,
             ChatGroq(
                 model=base_model,
-                api_key=api_key,
+                api_key=SecretStr(config.groq_api_key or ""),
             ),
         )
     elif provider == "google-gla":
         from langchain_google_genai import ChatGoogleGenerativeAI
 
-        api_key = SecretStr(config.google_api_key or "")
+        _require_key(config.google_api_key, "GOOGLE_API_KEY", "google-gla")
         model_obj = cast(
             BaseChatModel,
             ChatGoogleGenerativeAI(
                 model=base_model,
-                google_api_key=api_key,
+                google_api_key=SecretStr(config.google_api_key or ""),
             ),
         )
     elif provider == "openrouter":
-        api_key = SecretStr(config.openrouter_api_key or "")
+        _require_key(config.openrouter_api_key, "OPENROUTER_API_KEY", "openrouter")
         model_obj = cast(
             BaseChatModel,
             ChatOpenAI(
                 model=base_model,
                 base_url="https://openrouter.ai/api/v1",
-                api_key=api_key,
+                api_key=SecretStr(config.openrouter_api_key or ""),
             ),
         )
     else:
         # Default to OpenAI
-        api_key = SecretStr(config.openai_api_key or "")
+        _require_key(config.openai_api_key, "OPENAI_API_KEY", "openai")
         model_obj = cast(
             BaseChatModel,
             ChatOpenAI(
                 model=base_model,
-                api_key=api_key,
+                api_key=SecretStr(config.openai_api_key or ""),
             ),
         )
 
