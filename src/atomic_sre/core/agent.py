@@ -188,7 +188,6 @@ async def _load_mcp_tools(config: AgentSettings) -> list[BaseTool]:
                 name,
                 e,
                 name,
-                exc_info=True,
             )
     return mcp_tools
 
