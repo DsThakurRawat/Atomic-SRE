@@ -178,10 +178,10 @@ async def _load_mcp_tools(config: AgentSettings) -> list[BaseTool]:
     mcp_tools: list[BaseTool] = []
     for name, conn in connections.items():
         try:
-            client = MultiServerMCPClient({name: conn})
-            tools = cast(list[BaseTool], await client.get_tools())
-            mcp_tools.extend(tools)
-        except Exception as e:
+            async with MultiServerMCPClient({name: conn}) as client:
+                tools = cast(list[BaseTool], await client.get_tools())
+                mcp_tools.extend(tools)
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Could not connect to {name} MCP server: {e}. Skipping {name} tools.")
     return mcp_tools
 
