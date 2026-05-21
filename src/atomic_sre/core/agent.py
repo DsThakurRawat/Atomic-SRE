@@ -39,24 +39,28 @@ def _infer_provider(model_name: str) -> str:
         The inferred provider string, defaulting to 'openai'.
     """
     for prefix, provider in _MODEL_PREFIX_MAP.items():
-        if model_name.startswith(prefix):
+        if model_name.lower().startswith(prefix):
             return provider
     return "openai"
 
 
-def _require_key(key: str | None, env_var: str, provider: str) -> None:
-    """Raise if an API key is missing.
+def _require_key(key: str | None, env_var: str, provider: str) -> SecretStr:
+    """Raise if an API key is missing, otherwise return it as a SecretStr.
 
     Args:
         key: The API key value.
         env_var: Name of the environment variable for the error message.
         provider: Provider name for the error message.
+
+    Returns:
+        The validated API key as a SecretStr.
     """
     if not key:
         raise ValueError(
             f"{env_var} is required for the '{provider}' provider. "
             "Set it in your .env file or environment."
         )
+    return SecretStr(cast(str, key))
 
 def _get_model(config: AgentSettings) -> BaseChatModel:
     """Resolve the LangChain model object from configuration.
@@ -68,7 +72,6 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
         The resolved chat model.
     """
     model_id = config.model
-    provider = "openai"
     base_model = model_id
 
     if ":" in model_id:
@@ -97,12 +100,12 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
             ),
         )
     elif provider == "anthropic":
-        _require_key(config.anthropic_api_key, "ANTHROPIC_API_KEY", "anthropic")
+        api_key = _require_key(config.anthropic_api_key, "ANTHROPIC_API_KEY", "anthropic")
         model_obj = cast(
             BaseChatModel,
             ChatAnthropic(
                 model_name=base_model,
-                api_key=SecretStr(config.anthropic_api_key or ""),
+                api_key=api_key,
                 timeout=None,
                 stop=None,
             ),
@@ -110,43 +113,43 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
     elif provider == "groq":
         from langchain_groq import ChatGroq
 
-        _require_key(config.groq_api_key, "GROQ_API_KEY", "groq")
+        api_key = _require_key(config.groq_api_key, "GROQ_API_KEY", "groq")
         model_obj = cast(
             BaseChatModel,
             ChatGroq(
                 model=base_model,
-                api_key=SecretStr(config.groq_api_key or ""),
+                api_key=api_key,
             ),
         )
     elif provider == "google-gla":
         from langchain_google_genai import ChatGoogleGenerativeAI
 
-        _require_key(config.google_api_key, "GOOGLE_API_KEY", "google-gla")
+        api_key = _require_key(config.google_api_key, "GOOGLE_API_KEY", "google-gla")
         model_obj = cast(
             BaseChatModel,
             ChatGoogleGenerativeAI(
                 model=base_model,
-                google_api_key=SecretStr(config.google_api_key or ""),
+                google_api_key=api_key,
             ),
         )
     elif provider == "openrouter":
-        _require_key(config.openrouter_api_key, "OPENROUTER_API_KEY", "openrouter")
+        api_key = _require_key(config.openrouter_api_key, "OPENROUTER_API_KEY", "openrouter")
         model_obj = cast(
             BaseChatModel,
             ChatOpenAI(
                 model=base_model,
                 base_url="https://openrouter.ai/api/v1",
-                api_key=SecretStr(config.openrouter_api_key or ""),
+                api_key=api_key,
             ),
         )
     else:
         # Default to OpenAI
-        _require_key(config.openai_api_key, "OPENAI_API_KEY", "openai")
+        api_key = _require_key(config.openai_api_key, "OPENAI_API_KEY", "openai")
         model_obj = cast(
             BaseChatModel,
             ChatOpenAI(
                 model=base_model,
-                api_key=SecretStr(config.openai_api_key or ""),
+                api_key=api_key,
             ),
         )
 
