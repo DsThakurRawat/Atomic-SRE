@@ -94,6 +94,7 @@ async def run_case(case: ToolCallEvalCase) -> dict[str, Any]:
     tools.extend(github_tools)
 
     from deepagents import create_deep_agent
+    from opik.integrations.langchain import OpikTracer
 
     from atomic_sre.core.agent import _get_model
     from atomic_sre.core.settings import get_settings
@@ -109,5 +110,9 @@ async def run_case(case: ToolCallEvalCase) -> dict[str, Any]:
         response_format=ErrorDiagnosis,
     )
 
-    await agent.ainvoke({"messages": [{"role": "user", "content": render_agent_prompt(case)}]})
+    opik_tracer = OpikTracer()
+    await agent.ainvoke(
+        {"messages": [{"role": "user", "content": render_agent_prompt(case)}]},
+        config={"callbacks": [opik_tracer]},
+    )
     return {}
