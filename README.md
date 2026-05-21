@@ -110,7 +110,7 @@ graph TD
     C --> B
     B --> D[Diagnosis & Fix Suggestions]
     D --> E[Slack Notification]
-    
+
     subgraph "Core Agent Loop"
     B
     C

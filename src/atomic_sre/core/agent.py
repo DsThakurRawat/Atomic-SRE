@@ -58,6 +58,7 @@ def _require_key(key: str | None, env_var: str, provider: str) -> None:
             "Set it in your .env file or environment."
         )
 
+
 def _get_model(config: AgentSettings) -> BaseChatModel:
     """Resolve the LangChain model object from configuration.
 
@@ -153,14 +154,14 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
     return model_obj
 
 
-async def _load_mcp_tools(config: AgentSettings) -> list[BaseTool]:
+async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
     """Load tools dynamically from Slack and GitHub MCP servers.
 
     Args:
         config: Agent settings.
 
     Returns:
-        List of loaded MCP tools.
+        Tuple of loaded MCP tools and a boolean indicating if Slack tools are available.
     """
     connections = {}
     if config.github.mcp_url:
@@ -176,14 +177,23 @@ async def _load_mcp_tools(config: AgentSettings) -> list[BaseTool]:
         }
 
     mcp_tools: list[BaseTool] = []
+    any_slack = False
     for name, conn in connections.items():
         try:
             async with MultiServerMCPClient({name: conn}) as client:
                 tools = cast(list[BaseTool], await client.get_tools())
-                mcp_tools.extend(tools)
+                filtered_tools, has_slack = _filter_mcp_tools(tools)
+                mcp_tools.extend(filtered_tools)
+                if has_slack:
+                    any_slack = True
         except Exception as e:  # noqa: BLE001
-            logger.warning(f"Could not connect to {name} MCP server: {e}. Skipping {name} tools.")
-    return mcp_tools
+            logger.warning(
+                "Could not connect to %s MCP server: %s. Skipping %s tools.",
+                name,
+                e,
+                name,
+            )
+    return mcp_tools, any_slack
 
 
 def _filter_mcp_tools(mcp_tools: list[BaseTool]) -> tuple[list[BaseTool], bool]:
@@ -219,8 +229,7 @@ async def create_atomic_sre(config: AgentSettings) -> Any:
     Returns:
         The compiled deep agent.
     """
-    mcp_tools = await _load_mcp_tools(config)
-    filtered_tools, has_slack = _filter_mcp_tools(mcp_tools)
+    filtered_tools, has_slack = await _load_mcp_tools(config)
 
     # Register fallback Slack tool if the MCP server is down or unconfigured
     if not has_slack:
@@ -233,7 +242,10 @@ async def create_atomic_sre(config: AgentSettings) -> Any:
         ) -> dict[str, Any]:
             """Post message to Slack. Used for starting and posting final findings."""
             logger.warning(
-                f"[Fallback Slack] Post to channel {channel_id}: {payload} (thread: {thread_ts})"
+                "[Fallback Slack] Post to channel %s: %s (thread: %s)",
+                channel_id,
+                payload,
+                thread_ts,
             )
             return {"status": "ok", "message": "Logged to console (Slack MCP unavailable)"}
 
