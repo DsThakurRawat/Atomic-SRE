@@ -2,15 +2,15 @@
     Atomic SRE
 </h1>
 
-<p align="center">
+<p align="center"> <!-- spellchecker:disable-line -->
   <img src="docs/imgs/banner-v2.png" alt="Atomic SRE Banner" width="800">
 </p>
 
-<p align="center">
-    <strong>Flagship Orchestration Engine for the Autonomous Multi-Agent AI Organization</strong>
+<p align="center"> <!-- spellchecker:disable-line -->
+    <strong>Flagship Orchestration Engine for the Autonomous Multi-Agent AI Organisation</strong>
 </p>
 
-Welcome to **Atomic SRE**. This is a premium, open-source multi-agent orchestration engine designed to automate the heavy lifting of Site Reliability Engineering. It coordinates specialized autonomous agents to monitor logs, diagnose production issues, and execute root-cause fixes across distributed systems.
+Welcome to **Atomic SRE**. This is a premium, open-source multi-agent orchestration engine designed to automate the heavy lifting of Site Reliability Engineering. It coordinates specialised autonomous agents to monitor logs, diagnose production issues, and execute root-cause fixes across distributed systems.
 
 # Quick Start
 
@@ -135,12 +135,12 @@ graph LR
         5 -->|Notify Slack| End([Review])
     end
 
-    style 1 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
-    style 2 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
-    style 3 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
-    style 4 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
-    style 5 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff
-    style End fill:#15803D,stroke:#166534,stroke-width:2px,color:#fff
+    style 1 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
+    style 2 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
+    style 3 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
+    style 4 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
+    style 5 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
+    style End fill:#15803D,stroke:#166534,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
 ```
 
 # Technology Stack

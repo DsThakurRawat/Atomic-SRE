@@ -1,11 +1,12 @@
 """GitHub MCP toolset construction for tool call evaluation."""
 
 import os
-from typing import Any, cast
+from typing import Any
 
 import opik
 from langchain_core.tools import BaseTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_mcp_adapters.sessions import Connection
 
 
 async def build_github_toolset() -> list[BaseTool]:
@@ -23,16 +24,18 @@ async def build_github_toolset() -> list[BaseTool]:
         )
         raise RuntimeError(msg)
 
-    connections = {
+    connections: dict[str, Connection] = {
         "github": {
             "transport": "streamable_http",
             "url": "https://api.githubcopilot.com/mcp/",
-            "headers": {"Authorization": f"Bearer {token}"},
+            "headers": {
+                "Authorization": f"Bearer {token}"  # spellchecker:disable-line
+            },
         }
     }
 
     client = MultiServerMCPClient(connections)
-    all_tools = cast(list[BaseTool], await client.get_tools())
+    all_tools = await client.get_tools()
 
     allowed_github_tools = {"search_code", "get_file_contents"}
     tools = [t for t in all_tools if any(allowed in t.name for allowed in allowed_github_tools)]

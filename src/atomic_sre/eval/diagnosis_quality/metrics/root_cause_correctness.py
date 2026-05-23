@@ -5,7 +5,7 @@ from typing import Any
 from opik.evaluation.metrics import GEval, base_metric, score_result
 
 
-class RootCauseCorrectness(base_metric.BaseMetric):  # type: ignore[misc]
+class RootCauseCorrectness(base_metric.BaseMetric):
     """Judge whether the root cause matches the expected issue."""
 
     def __init__(

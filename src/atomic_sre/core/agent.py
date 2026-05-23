@@ -1,16 +1,22 @@
-"""Atomic SRE using deepagents and LangChain."""
+"""Atomic SRE using LangGraph and LangChain."""
 
 import logging
-from typing import Any, cast
+from collections.abc import Sequence
+from typing import Annotated, Any, TypedDict, cast
 
-from deepagents import create_deep_agent
 from langchain_anthropic import ChatAnthropic
 from langchain_aws import ChatBedrock
 from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import BaseMessage, SystemMessage, ToolMessage
 from langchain_core.tools import BaseTool, tool
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_mcp_adapters.sessions import Connection
 from langchain_openai import ChatOpenAI
-from pydantic import SecretStr
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.message import add_messages
+from langgraph.graph.state import CompiledStateGraph
+from langgraph.prebuilt import ToolNode
+from pydantic import SecretStr, ValidationError
 
 from atomic_sre.core.models import ErrorDiagnosis
 from atomic_sre.core.prompts import SYSTEM_PROMPT, build_diagnosis_prompt
@@ -92,7 +98,7 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
     elif provider == "bedrock":
         model_obj = cast(
             BaseChatModel,
-            ChatBedrock(
+            ChatBedrock(  # type: ignore[call-arg]
                 model_id=base_model,
                 region_name=config.aws.region,
             ),
@@ -163,13 +169,19 @@ async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
     Returns:
         Tuple of loaded MCP tools and a boolean indicating if Slack tools are available.
     """
-    connections = {}
+    connections: dict[str, Connection] = {}
     if config.github.mcp_url:
-        connections["github"] = {
+        github_conn: dict[str, Any] = {
             "transport": "streamable_http",
             "url": config.github.mcp_url,
-            "headers": {"Authorization": f"Bearer {config.github.personal_access_token}"},
         }
+        if config.github.personal_access_token:
+            github_conn["headers"] = {
+                "Authorization": (  # spellchecker:disable-line
+                    f"Bearer {config.github.personal_access_token}"
+                )
+            }
+        connections["github"] = cast(Connection, github_conn)
     if config.slack.mcp_url:
         connections["slack"] = {
             "transport": "sse",
@@ -180,8 +192,8 @@ async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
     any_slack = False
     for name, conn in connections.items():
         try:
-            async with MultiServerMCPClient({name: conn}) as client:
-                tools = cast(list[BaseTool], await client.get_tools())
+            async with MultiServerMCPClient({name: conn}) as client:  # type: ignore[misc]
+                tools = await client.get_tools()
                 filtered_tools, has_slack = _filter_mcp_tools(tools)
                 mcp_tools.extend(filtered_tools)
                 if has_slack:
@@ -196,7 +208,7 @@ async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
     return mcp_tools, any_slack
 
 
-def _filter_mcp_tools(mcp_tools: list[BaseTool]) -> tuple[list[BaseTool], bool]:
+def _filter_mcp_tools(mcp_tools: Sequence[BaseTool]) -> tuple[list[BaseTool], bool]:
     """Filter MCP tools to keep only essential Slack/GitHub tools.
 
     Args:
@@ -220,14 +232,23 @@ def _filter_mcp_tools(mcp_tools: list[BaseTool]) -> tuple[list[BaseTool], bool]:
     return filtered_tools, has_slack
 
 
-async def create_atomic_sre(config: AgentSettings) -> Any:
-    """Create the Atomic SRE with all toolsets configured.
+class AgentState(TypedDict):
+    """State structure for the Atomic SRE agent."""
+
+    messages: Annotated[Sequence[BaseMessage], add_messages]
+    diagnosis: ErrorDiagnosis | None
+
+
+async def create_atomic_sre(
+    config: AgentSettings,
+) -> CompiledStateGraph[AgentState, Any, Any]:
+    """Create the Atomic SRE with all toolsets configured using pure LangGraph.
 
     Args:
         config: Agent settings.
 
     Returns:
-        The compiled deep agent.
+        The compiled StateGraph agent.
     """
     filtered_tools, has_slack = await _load_mcp_tools(config)
 
@@ -254,12 +275,134 @@ async def create_atomic_sre(config: AgentSettings) -> Any:
     cw_toolset = create_cloudwatch_toolset(config)
     filtered_tools.extend(cw_toolset)
 
-    return create_deep_agent(
-        model=_get_model(config),
-        tools=filtered_tools,
-        system_prompt=SYSTEM_PROMPT,
-        response_format=ErrorDiagnosis,
-    )
+    model = _get_model(config)
+    return build_agent_graph(model, filtered_tools)
+
+
+def _handle_diagnosis_validation(response: Any) -> dict[str, Any]:
+    """Validate ErrorDiagnosis tool calls.
+
+    Args:
+        response: The chat model response.
+
+    Returns:
+        The updated agent state dictionary.
+    """
+    if hasattr(response, "tool_calls") and response.tool_calls:
+        diag_calls = [tc for tc in response.tool_calls if tc["name"] == "ErrorDiagnosis"]
+        if len(diag_calls) > 1:
+            tool_msgs = [
+                ToolMessage(
+                    tool_call_id=tc["id"],
+                    content=(
+                        "Validation Error: Multiple ErrorDiagnosis calls in the same turn "
+                        "are not allowed. Please output a single, final ErrorDiagnosis."
+                    )
+                    if tc["name"] == "ErrorDiagnosis"
+                    else "Cancelled due to multiple ErrorDiagnosis calls.",
+                    name=tc["name"],
+                )
+                for tc in response.tool_calls
+            ]
+            return {"messages": [response] + tool_msgs}
+
+        if diag_calls:
+            diag_call = diag_calls[0]
+            try:
+                # Pydantic validates here acting as the bouncer
+                diagnosis = ErrorDiagnosis(**diag_call["args"])
+                tool_msgs = [
+                    ToolMessage(
+                        tool_call_id=tc["id"],
+                        content="Diagnosis accepted."
+                        if tc["name"] == "ErrorDiagnosis"
+                        else "Ignored because diagnosis was accepted.",
+                        name=tc["name"],
+                    )
+                    for tc in response.tool_calls
+                ]
+                return {"messages": [response] + tool_msgs, "diagnosis": diagnosis}
+            except (ValidationError, TypeError) as e:
+                tool_msgs = []
+                for tc in response.tool_calls:
+                    if tc["name"] == "ErrorDiagnosis":
+                        if isinstance(e, ValidationError):
+                            err_list = []
+                            for err in e.errors():
+                                loc_str = ".".join(str(p) for p in err["loc"])
+                                err_list.append(f"{loc_str}: {err['msg']}")
+                            error_msg = "; ".join(err_list)
+                        else:
+                            error_msg = str(e)
+                        tool_msgs.append(
+                            ToolMessage(
+                                tool_call_id=tc["id"],
+                                content=(
+                                    f"Validation Error: {error_msg}. "
+                                    "Please fix the structure and try again."
+                                ),
+                                name=tc["name"],
+                            )
+                        )
+                    else:
+                        tool_msgs.append(
+                            ToolMessage(
+                                tool_call_id=tc["id"],
+                                content="Cancelled because ErrorDiagnosis validation failed.",
+                                name=tc["name"],
+                            )
+                        )
+                return {"messages": [response] + tool_msgs}
+
+    return {"messages": [response]}
+
+
+def build_agent_graph(
+    model: BaseChatModel, tools: list[BaseTool]
+) -> CompiledStateGraph[AgentState, Any, Any, Any]:
+    """Build the pure LangGraph workflow for the agent.
+
+    Args:
+        model: The LLM to use.
+        tools: The tools to make available.
+
+    Returns:
+        The compiled StateGraph.
+    """
+    model_with_tools = model.bind_tools(tools + [ErrorDiagnosis])
+
+    async def call_model(state: AgentState) -> dict[str, Any]:
+        messages = list(state["messages"])
+        if not messages or messages[0].type != "system":
+            messages.insert(0, SystemMessage(content=SYSTEM_PROMPT))
+
+        response = await model_with_tools.ainvoke(messages)
+        return _handle_diagnosis_validation(response)
+
+    def route_after_model(state: AgentState) -> str:
+        if state.get("diagnosis") is not None:
+            return END
+
+        messages = state["messages"]
+        last_message = messages[-1]
+
+        if last_message.type == "tool":
+            return "agent"
+
+        if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+            return "tools"
+
+        return END
+
+    workflow = StateGraph(AgentState)
+    workflow.add_node("agent", call_model)
+    workflow.add_node("tools", ToolNode(tools))
+
+    workflow.add_edge(START, "agent")
+    workflow.add_conditional_edges("agent", route_after_model, ["tools", "agent", END])
+    workflow.add_edge("tools", "agent")
+
+    return workflow.compile()
 
 
 async def diagnose_error(
@@ -287,7 +430,7 @@ async def diagnose_error(
 
     result = await agent.ainvoke({"messages": [{"role": "user", "content": prompt}]})
 
-    diagnosis = result.get("response_format")
+    diagnosis = result.get("diagnosis")
     if not isinstance(diagnosis, ErrorDiagnosis):
         raise RuntimeError("Agent failed to output a structured diagnosis.")
 
