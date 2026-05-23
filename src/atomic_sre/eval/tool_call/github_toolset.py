@@ -27,11 +27,11 @@ async def build_github_toolset() -> list[BaseTool]:
         "github": {
             "transport": "streamable_http",
             "url": "https://api.githubcopilot.com/mcp/",
-            "headers": {"Authorization": f"Bearer {token}"},
+            "headers": {"Authorization": f"Bearer {token}"},  # spellchecker:disable-line
         }
     }
 
-    client = MultiServerMCPClient(connections)  # type: ignore[arg-type]
+    client = MultiServerMCPClient(connections)
     all_tools = await client.get_tools()
 
     allowed_github_tools = {"search_code", "get_file_contents"}

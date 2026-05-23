@@ -30,14 +30,14 @@ def _build_banner() -> Panel:
     """
     ascii_art = get_ascii_art().strip("\n")
 
-    # Left-align the ASCII art lines to keep formatting intact, but center the block
+    # Left-align the ASCII art lines to keep formatting intact, but centre the block
     art_text = Text()
     for line in ascii_art.splitlines():
         art_text.append(f"{line}\n", style="bold green")
-    centered_art = Align.center(art_text)
+    centred_art = Align.center(art_text)  # spellchecker:disable-line
 
     # Subtitle text
-    subtitle_text = Text(justify="center")
+    subtitle_text = Text(justify="center")  # spellchecker:disable-line
     subtitle_text.append(
         "\n🤖 Autonomous Multi-Agent AI Orchestration for SRE\n",
         style="bright_white",
@@ -49,7 +49,7 @@ def _build_banner() -> Panel:
     footer_text.append(f"v{_get_version()}\n", style="bold green")
     footer_text.append("Made by DIVYANSH RAWAT", style="dim white")
     return Panel(
-        Group(centered_art, subtitle_text, footer_text),
+        Group(centred_art, subtitle_text, footer_text),
         title="Welcome to Atomic SRE",
         border_style="bold green",
         expand=True,

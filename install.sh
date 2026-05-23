@@ -34,7 +34,7 @@ else
     git pull origin main
 fi
 
-# Synchronize dependencies and install CLI globally
+# Synchronise dependencies and install CLI globally
 echo "⚡ Syncing dependencies and installing CLI globally with uv..."
 uv sync
 

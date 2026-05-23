@@ -96,9 +96,9 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
     elif provider == "bedrock":
         model_obj = cast(
             BaseChatModel,
-            ChatBedrock(
-                model_id=base_model,  # type: ignore[call-arg]
-                region_name=config.aws.region,  # type: ignore[call-arg]
+            ChatBedrock(  # type: ignore[call-arg]
+                model_id=base_model,
+                region_name=config.aws.region,
             ),
         )
     elif provider == "anthropic":
@@ -172,7 +172,7 @@ async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
         connections["github"] = {
             "transport": "streamable_http",
             "url": config.github.mcp_url,
-            "headers": {"Authorization": f"Bearer {config.github.personal_access_token}"},
+            "headers": {"Authorization": f"Bearer {config.github.personal_access_token}"},  # spellchecker:disable-line
         }
     if config.slack.mcp_url:
         connections["slack"] = {
