@@ -8,7 +8,6 @@ from opik import Opik
 from opik.evaluation import evaluate
 from opik.evaluation.evaluation_result import EvaluationResult
 
-from atomic_sre.core.models import ErrorDiagnosis
 from atomic_sre.core.prompts import SYSTEM_PROMPT
 from atomic_sre.eval.tool_call.config import (
     DEFAULT_EXPERIMENT_NAME,
@@ -102,5 +101,12 @@ async def run_case(case: ToolCallEvalCase) -> dict[str, Any]:
 
     agent = build_agent_graph(model, tools)
 
-    await agent.ainvoke({"messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": render_agent_prompt(case)}]})
+    await agent.ainvoke(
+        {
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": render_agent_prompt(case)},
+            ]
+        }
+    )
     return {}

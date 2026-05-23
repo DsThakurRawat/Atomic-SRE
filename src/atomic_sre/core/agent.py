@@ -1,7 +1,8 @@
 """Atomic SRE using LangGraph and LangChain."""
 
 import logging
-from typing import Annotated, Any, Sequence, TypedDict, cast
+from collections.abc import Sequence
+from typing import Annotated, Any, TypedDict, cast
 
 from langchain_anthropic import ChatAnthropic
 from langchain_aws import ChatBedrock
@@ -96,8 +97,8 @@ def _get_model(config: AgentSettings) -> BaseChatModel:
         model_obj = cast(
             BaseChatModel,
             ChatBedrock(
-                model_id=base_model,
-                region_name=config.aws.region,
+                model_id=base_model,  # type: ignore[call-arg]
+                region_name=config.aws.region,  # type: ignore[call-arg]
             ),
         )
     elif provider == "anthropic":
@@ -166,7 +167,7 @@ async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
     Returns:
         Tuple of loaded MCP tools and a boolean indicating if Slack tools are available.
     """
-    connections = {}
+    connections: dict[str, Any] = {}
     if config.github.mcp_url:
         connections["github"] = {
             "transport": "streamable_http",
@@ -183,8 +184,8 @@ async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
     any_slack = False
     for name, conn in connections.items():
         try:
-            async with MultiServerMCPClient({name: conn}) as client:
-                tools = cast(list[BaseTool], await client.get_tools())
+            async with MultiServerMCPClient({name: conn}) as client:  # type: ignore[misc]
+                tools = await client.get_tools()
                 filtered_tools, has_slack = _filter_mcp_tools(tools)
                 mcp_tools.extend(filtered_tools)
                 if has_slack:
@@ -199,7 +200,7 @@ async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
     return mcp_tools, any_slack
 
 
-def _filter_mcp_tools(mcp_tools: list[BaseTool]) -> tuple[list[BaseTool], bool]:
+def _filter_mcp_tools(mcp_tools: Sequence[BaseTool]) -> tuple[list[BaseTool], bool]:
     """Filter MCP tools to keep only essential Slack/GitHub tools.
 
     Args:
@@ -224,8 +225,11 @@ def _filter_mcp_tools(mcp_tools: list[BaseTool]) -> tuple[list[BaseTool], bool]:
 
 
 class AgentState(TypedDict):
+    """State structure for the Atomic SRE agent."""
+
     messages: Annotated[Sequence[BaseMessage], add_messages]
     diagnosis: ErrorDiagnosis | None
+
 
 async def create_atomic_sre(config: AgentSettings) -> Any:
     """Create the Atomic SRE with all toolsets configured using pure LangGraph.
@@ -264,19 +268,20 @@ async def create_atomic_sre(config: AgentSettings) -> Any:
     model = _get_model(config)
     return build_agent_graph(model, filtered_tools)
 
-def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:
+
+def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:  # noqa: C901
     """Build the pure LangGraph workflow for the agent.
-    
+
     Args:
         model: The LLM to use.
         tools: The tools to make available.
-        
+
     Returns:
         The compiled StateGraph.
     """
     model_with_tools = model.bind_tools(tools + [ErrorDiagnosis])
 
-    async def call_model(state: AgentState) -> dict:
+    async def call_model(state: AgentState) -> dict[str, Any]:
         messages = list(state["messages"])
         if not messages or messages[0].type != "system":
             messages.insert(0, SystemMessage(content=SYSTEM_PROMPT))
@@ -284,7 +289,9 @@ def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:
         response = await model_with_tools.ainvoke(messages)
 
         if hasattr(response, "tool_calls") and response.tool_calls:
-            diag_call = next((tc for tc in response.tool_calls if tc["name"] == "ErrorDiagnosis"), None)
+            diag_call = next(
+                (tc for tc in response.tool_calls if tc["name"] == "ErrorDiagnosis"), None
+            )
             if diag_call:
                 try:
                     # Pydantic validates here acting as the bouncer
@@ -292,8 +299,10 @@ def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:
                     tool_msgs = [
                         ToolMessage(
                             tool_call_id=tc["id"],
-                            content="Diagnosis accepted." if tc["name"] == "ErrorDiagnosis" else "Ignored because diagnosis was accepted.",
-                            name=tc["name"]
+                            content="Diagnosis accepted."
+                            if tc["name"] == "ErrorDiagnosis"
+                            else "Ignored because diagnosis was accepted.",
+                            name=tc["name"],
                         )
                         for tc in response.tool_calls
                     ]
@@ -302,17 +311,24 @@ def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:
                     tool_msgs = []
                     for tc in response.tool_calls:
                         if tc["name"] == "ErrorDiagnosis":
-                            tool_msgs.append(ToolMessage(
-                                tool_call_id=tc["id"],
-                                content=f"Validation Error: {e}. Please fix the structure and try again.",
-                                name=tc["name"]
-                            ))
+                            tool_msgs.append(
+                                ToolMessage(
+                                    tool_call_id=tc["id"],
+                                    content=(
+                                        f"Validation Error: {e}. "
+                                        "Please fix the structure and try again."
+                                    ),
+                                    name=tc["name"],
+                                )
+                            )
                         else:
-                            tool_msgs.append(ToolMessage(
-                                tool_call_id=tc["id"],
-                                content="Cancelled because ErrorDiagnosis validation failed.",
-                                name=tc["name"]
-                            ))
+                            tool_msgs.append(
+                                ToolMessage(
+                                    tool_call_id=tc["id"],
+                                    content="Cancelled because ErrorDiagnosis validation failed.",
+                                    name=tc["name"],
+                                )
+                            )
                     return {"messages": [response] + tool_msgs}
 
         return {"messages": [response]}
@@ -320,16 +336,16 @@ def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:
     def route_after_model(state: AgentState) -> str:
         if state.get("diagnosis") is not None:
             return END
-            
+
         messages = state["messages"]
         last_message = messages[-1]
-        
+
         if last_message.type == "tool":
             return "agent"
-            
+
         if hasattr(last_message, "tool_calls") and last_message.tool_calls:
             return "tools"
-            
+
         return END
 
     workflow = StateGraph(AgentState)
