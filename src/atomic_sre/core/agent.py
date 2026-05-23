@@ -10,6 +10,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, SystemMessage, ToolMessage
 from langchain_core.tools import BaseTool, tool
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_mcp_adapters.sessions import Connection
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
@@ -168,17 +169,19 @@ async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
     Returns:
         Tuple of loaded MCP tools and a boolean indicating if Slack tools are available.
     """
-    connections: dict[str, Any] = {}
+    connections: dict[str, Connection] = {}
     if config.github.mcp_url:
-        connections["github"] = {
+        github_conn: dict[str, Any] = {
             "transport": "streamable_http",
             "url": config.github.mcp_url,
-            "headers": {
+        }
+        if config.github.personal_access_token:
+            github_conn["headers"] = {
                 "Authorization": (  # spellchecker:disable-line
                     f"Bearer {config.github.personal_access_token}"
                 )
-            },
-        }
+            }
+        connections["github"] = cast(Connection, github_conn)
     if config.slack.mcp_url:
         connections["slack"] = {
             "transport": "sse",
@@ -236,7 +239,9 @@ class AgentState(TypedDict):
     diagnosis: ErrorDiagnosis | None
 
 
-async def create_atomic_sre(config: AgentSettings) -> CompiledStateGraph:
+async def create_atomic_sre(
+    config: AgentSettings,
+) -> CompiledStateGraph[AgentState, Any, Any, Any]:
     """Create the Atomic SRE with all toolsets configured using pure LangGraph.
 
     Args:
@@ -276,7 +281,7 @@ async def create_atomic_sre(config: AgentSettings) -> CompiledStateGraph:
 
 def build_agent_graph(  # noqa: C901
     model: BaseChatModel, tools: list[BaseTool]
-) -> CompiledStateGraph:
+) -> CompiledStateGraph[AgentState, Any, Any, Any]:
     """Build the pure LangGraph workflow for the agent.
 
     Args:
@@ -296,10 +301,25 @@ def build_agent_graph(  # noqa: C901
         response = await model_with_tools.ainvoke(messages)
 
         if hasattr(response, "tool_calls") and response.tool_calls:
-            diag_call = next(
-                (tc for tc in response.tool_calls if tc["name"] == "ErrorDiagnosis"), None
-            )
-            if diag_call:
+            diag_calls = [tc for tc in response.tool_calls if tc["name"] == "ErrorDiagnosis"]
+            if len(diag_calls) > 1:
+                tool_msgs = [
+                    ToolMessage(
+                        tool_call_id=tc["id"],
+                        content=(
+                            "Validation Error: Multiple ErrorDiagnosis calls in the same turn "
+                            "are not allowed. Please output a single, final ErrorDiagnosis."
+                        )
+                        if tc["name"] == "ErrorDiagnosis"
+                        else "Cancelled due to multiple ErrorDiagnosis calls.",
+                        name=tc["name"],
+                    )
+                    for tc in response.tool_calls
+                ]
+                return {"messages": [response] + tool_msgs}
+
+            if diag_calls:
+                diag_call = diag_calls[0]
                 try:
                     # Pydantic validates here acting as the bouncer
                     diagnosis = ErrorDiagnosis(**diag_call["args"])

@@ -6,6 +6,7 @@ from typing import Any
 import opik
 from langchain_core.tools import BaseTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_mcp_adapters.sessions import Connection
 
 
 async def build_github_toolset() -> list[BaseTool]:
@@ -23,7 +24,7 @@ async def build_github_toolset() -> list[BaseTool]:
         )
         raise RuntimeError(msg)
 
-    connections: dict[str, Any] = {
+    connections: dict[str, Connection] = {
         "github": {
             "transport": "streamable_http",
             "url": "https://api.githubcopilot.com/mcp/",
