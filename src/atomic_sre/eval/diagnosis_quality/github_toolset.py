@@ -27,7 +27,9 @@ async def build_github_toolset() -> list[BaseTool]:
         "github": {
             "transport": "streamable_http",
             "url": "https://api.githubcopilot.com/mcp/",
-            "headers": {"Authorization": f"Bearer {token}"},  # spellchecker:disable-line
+            "headers": {
+                "Authorization": f"Bearer {token}"  # spellchecker:disable-line
+            },
         }
     }
 

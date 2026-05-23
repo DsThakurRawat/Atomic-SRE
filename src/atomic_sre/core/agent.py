@@ -172,7 +172,11 @@ async def _load_mcp_tools(config: AgentSettings) -> tuple[list[BaseTool], bool]:
         connections["github"] = {
             "transport": "streamable_http",
             "url": config.github.mcp_url,
-            "headers": {"Authorization": f"Bearer {config.github.personal_access_token}"},  # spellchecker:disable-line
+            "headers": {
+                "Authorization": (  # spellchecker:disable-line
+                    f"Bearer {config.github.personal_access_token}"
+                )
+            },
         }
     if config.slack.mcp_url:
         connections["slack"] = {
