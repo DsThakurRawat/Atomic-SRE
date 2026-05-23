@@ -279,7 +279,85 @@ async def create_atomic_sre(
     return build_agent_graph(model, filtered_tools)
 
 
-def build_agent_graph(  # noqa: C901
+def _handle_diagnosis_validation(response: Any) -> dict[str, Any]:
+    """Validate ErrorDiagnosis tool calls.
+
+    Args:
+        response: The chat model response.
+
+    Returns:
+        The updated agent state dictionary.
+    """
+    if hasattr(response, "tool_calls") and response.tool_calls:
+        diag_calls = [tc for tc in response.tool_calls if tc["name"] == "ErrorDiagnosis"]
+        if len(diag_calls) > 1:
+            tool_msgs = [
+                ToolMessage(
+                    tool_call_id=tc["id"],
+                    content=(
+                        "Validation Error: Multiple ErrorDiagnosis calls in the same turn "
+                        "are not allowed. Please output a single, final ErrorDiagnosis."
+                    )
+                    if tc["name"] == "ErrorDiagnosis"
+                    else "Cancelled due to multiple ErrorDiagnosis calls.",
+                    name=tc["name"],
+                )
+                for tc in response.tool_calls
+            ]
+            return {"messages": [response] + tool_msgs}
+
+        if diag_calls:
+            diag_call = diag_calls[0]
+            try:
+                # Pydantic validates here acting as the bouncer
+                diagnosis = ErrorDiagnosis(**diag_call["args"])
+                tool_msgs = [
+                    ToolMessage(
+                        tool_call_id=tc["id"],
+                        content="Diagnosis accepted."
+                        if tc["name"] == "ErrorDiagnosis"
+                        else "Ignored because diagnosis was accepted.",
+                        name=tc["name"],
+                    )
+                    for tc in response.tool_calls
+                ]
+                return {"messages": [response] + tool_msgs, "diagnosis": diagnosis}
+            except (ValidationError, TypeError) as e:
+                tool_msgs = []
+                for tc in response.tool_calls:
+                    if tc["name"] == "ErrorDiagnosis":
+                        if isinstance(e, ValidationError):
+                            err_list = []
+                            for err in e.errors():
+                                loc_str = ".".join(str(p) for p in err["loc"])
+                                err_list.append(f"{loc_str}: {err['msg']}")
+                            error_msg = "; ".join(err_list)
+                        else:
+                            error_msg = str(e)
+                        tool_msgs.append(
+                            ToolMessage(
+                                tool_call_id=tc["id"],
+                                content=(
+                                    f"Validation Error: {error_msg}. "
+                                    "Please fix the structure and try again."
+                                ),
+                                name=tc["name"],
+                            )
+                        )
+                    else:
+                        tool_msgs.append(
+                            ToolMessage(
+                                tool_call_id=tc["id"],
+                                content="Cancelled because ErrorDiagnosis validation failed.",
+                                name=tc["name"],
+                            )
+                        )
+                return {"messages": [response] + tool_msgs}
+
+    return {"messages": [response]}
+
+
+def build_agent_graph(
     model: BaseChatModel, tools: list[BaseTool]
 ) -> CompiledStateGraph[AgentState, Any, Any, Any]:
     """Build the pure LangGraph workflow for the agent.
@@ -299,74 +377,7 @@ def build_agent_graph(  # noqa: C901
             messages.insert(0, SystemMessage(content=SYSTEM_PROMPT))
 
         response = await model_with_tools.ainvoke(messages)
-
-        if hasattr(response, "tool_calls") and response.tool_calls:
-            diag_calls = [tc for tc in response.tool_calls if tc["name"] == "ErrorDiagnosis"]
-            if len(diag_calls) > 1:
-                tool_msgs = [
-                    ToolMessage(
-                        tool_call_id=tc["id"],
-                        content=(
-                            "Validation Error: Multiple ErrorDiagnosis calls in the same turn "
-                            "are not allowed. Please output a single, final ErrorDiagnosis."
-                        )
-                        if tc["name"] == "ErrorDiagnosis"
-                        else "Cancelled due to multiple ErrorDiagnosis calls.",
-                        name=tc["name"],
-                    )
-                    for tc in response.tool_calls
-                ]
-                return {"messages": [response] + tool_msgs}
-
-            if diag_calls:
-                diag_call = diag_calls[0]
-                try:
-                    # Pydantic validates here acting as the bouncer
-                    diagnosis = ErrorDiagnosis(**diag_call["args"])
-                    tool_msgs = [
-                        ToolMessage(
-                            tool_call_id=tc["id"],
-                            content="Diagnosis accepted."
-                            if tc["name"] == "ErrorDiagnosis"
-                            else "Ignored because diagnosis was accepted.",
-                            name=tc["name"],
-                        )
-                        for tc in response.tool_calls
-                    ]
-                    return {"messages": [response] + tool_msgs, "diagnosis": diagnosis}
-                except (ValidationError, TypeError) as e:
-                    tool_msgs = []
-                    for tc in response.tool_calls:
-                        if tc["name"] == "ErrorDiagnosis":
-                            if isinstance(e, ValidationError):
-                                err_list = []
-                                for err in e.errors():
-                                    loc_str = ".".join(str(p) for p in err["loc"])
-                                    err_list.append(f"{loc_str}: {err['msg']}")
-                                error_msg = "; ".join(err_list)
-                            else:
-                                error_msg = str(e)
-                            tool_msgs.append(
-                                ToolMessage(
-                                    tool_call_id=tc["id"],
-                                    content=(
-                                        f"Validation Error: {error_msg}. "
-                                        "Please fix the structure and try again."
-                                    ),
-                                    name=tc["name"],
-                                )
-                            )
-                        else:
-                            tool_msgs.append(
-                                ToolMessage(
-                                    tool_call_id=tc["id"],
-                                    content="Cancelled because ErrorDiagnosis validation failed.",
-                                    name=tc["name"],
-                                )
-                            )
-                    return {"messages": [response] + tool_msgs}
-
-        return {"messages": [response]}
+        return _handle_diagnosis_validation(response)
 
     def route_after_model(state: AgentState) -> str:
         if state.get("diagnosis") is not None:
