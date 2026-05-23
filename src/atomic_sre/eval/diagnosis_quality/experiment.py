@@ -110,7 +110,12 @@ async def run_case(case: DiagnosisQualityEvalCase) -> dict[str, Any]:
     agent = build_agent_graph(model, tools)
 
     result = await agent.ainvoke(
-        {"messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": render_agent_prompt(case)}]}
+        {
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": render_agent_prompt(case)},
+            ]
+        }
     )
 
     diagnosis = result.get("diagnosis")

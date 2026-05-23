@@ -8,7 +8,7 @@ from opik.message_processing.emulation.models import SpanModel
 from atomic_sre.eval.tool_call.metrics.span_tools import extract_tool_names
 
 
-class ExpectedToolSelectOrder(base_metric.BaseMetric):  # type: ignore[misc]
+class ExpectedToolSelectOrder(base_metric.BaseMetric):
     """Validate the expected tool selection order."""
 
     def __init__(self, name: str = "expected_tool_select_order"):
