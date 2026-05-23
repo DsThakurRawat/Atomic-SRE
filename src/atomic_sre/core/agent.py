@@ -359,7 +359,7 @@ def _handle_diagnosis_validation(response: Any) -> dict[str, Any]:
 
 def build_agent_graph(
     model: BaseChatModel, tools: list[BaseTool]
-) -> CompiledStateGraph[AgentState, Any, Any]:
+) -> CompiledStateGraph[AgentState, Any, Any, Any]:
     """Build the pure LangGraph workflow for the agent.
 
     Args:
