@@ -1,4 +1,4 @@
-"""Atomic SRE using deepagents and LangChain."""
+"""Atomic SRE using LangGraph and LangChain."""
 
 import logging
 from typing import Annotated, Any, Sequence, TypedDict, cast
@@ -13,7 +13,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
-from pydantic import SecretStr
+from pydantic import SecretStr, ValidationError
 
 from atomic_sre.core.models import ErrorDiagnosis
 from atomic_sre.core.prompts import SYSTEM_PROMPT, build_diagnosis_prompt
@@ -289,8 +289,16 @@ def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:
                 try:
                     # Pydantic validates here acting as the bouncer
                     diagnosis = ErrorDiagnosis(**diag_call["args"])
-                    return {"messages": [response], "diagnosis": diagnosis}
-                except Exception as e:
+                    tool_msgs = [
+                        ToolMessage(
+                            tool_call_id=tc["id"],
+                            content="Diagnosis accepted." if tc["name"] == "ErrorDiagnosis" else "Ignored because diagnosis was accepted.",
+                            name=tc["name"]
+                        )
+                        for tc in response.tool_calls
+                    ]
+                    return {"messages": [response] + tool_msgs, "diagnosis": diagnosis}
+                except ValidationError as e:
                     tool_msgs = []
                     for tc in response.tool_calls:
                         if tc["name"] == "ErrorDiagnosis":
