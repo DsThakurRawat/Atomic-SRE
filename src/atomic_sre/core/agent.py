@@ -13,6 +13,7 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode
 from pydantic import SecretStr, ValidationError
 
@@ -235,7 +236,7 @@ class AgentState(TypedDict):
     diagnosis: ErrorDiagnosis | None
 
 
-async def create_atomic_sre(config: AgentSettings) -> Any:
+async def create_atomic_sre(config: AgentSettings) -> CompiledStateGraph:
     """Create the Atomic SRE with all toolsets configured using pure LangGraph.
 
     Args:
@@ -273,7 +274,9 @@ async def create_atomic_sre(config: AgentSettings) -> Any:
     return build_agent_graph(model, filtered_tools)
 
 
-def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:  # noqa: C901
+def build_agent_graph(  # noqa: C901
+    model: BaseChatModel, tools: list[BaseTool]
+) -> CompiledStateGraph:
     """Build the pure LangGraph workflow for the agent.
 
     Args:
@@ -311,15 +314,23 @@ def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:  # no
                         for tc in response.tool_calls
                     ]
                     return {"messages": [response] + tool_msgs, "diagnosis": diagnosis}
-                except ValidationError as e:
+                except (ValidationError, TypeError) as e:
                     tool_msgs = []
                     for tc in response.tool_calls:
                         if tc["name"] == "ErrorDiagnosis":
+                            if isinstance(e, ValidationError):
+                                err_list = []
+                                for err in e.errors():
+                                    loc_str = ".".join(str(p) for p in err["loc"])
+                                    err_list.append(f"{loc_str}: {err['msg']}")
+                                error_msg = "; ".join(err_list)
+                            else:
+                                error_msg = str(e)
                             tool_msgs.append(
                                 ToolMessage(
                                     tool_call_id=tc["id"],
                                     content=(
-                                        f"Validation Error: {e}. "
+                                        f"Validation Error: {error_msg}. "
                                         "Please fix the structure and try again."
                                     ),
                                     name=tc["name"],
