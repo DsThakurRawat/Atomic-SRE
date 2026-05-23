@@ -1,15 +1,18 @@
 """Atomic SRE using deepagents and LangChain."""
 
 import logging
-from typing import Any, cast
+from typing import Annotated, Any, Sequence, TypedDict, cast
 
-from deepagents import create_deep_agent
 from langchain_anthropic import ChatAnthropic
 from langchain_aws import ChatBedrock
 from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import BaseMessage, SystemMessage, ToolMessage
 from langchain_core.tools import BaseTool, tool
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import ChatOpenAI
+from langgraph.graph import END, START, StateGraph
+from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode
 from pydantic import SecretStr
 
 from atomic_sre.core.models import ErrorDiagnosis
@@ -220,14 +223,18 @@ def _filter_mcp_tools(mcp_tools: list[BaseTool]) -> tuple[list[BaseTool], bool]:
     return filtered_tools, has_slack
 
 
+class AgentState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], add_messages]
+    diagnosis: ErrorDiagnosis | None
+
 async def create_atomic_sre(config: AgentSettings) -> Any:
-    """Create the Atomic SRE with all toolsets configured.
+    """Create the Atomic SRE with all toolsets configured using pure LangGraph.
 
     Args:
         config: Agent settings.
 
     Returns:
-        The compiled deep agent.
+        The compiled StateGraph agent.
     """
     filtered_tools, has_slack = await _load_mcp_tools(config)
 
@@ -254,12 +261,78 @@ async def create_atomic_sre(config: AgentSettings) -> Any:
     cw_toolset = create_cloudwatch_toolset(config)
     filtered_tools.extend(cw_toolset)
 
-    return create_deep_agent(
-        model=_get_model(config),
-        tools=filtered_tools,
-        system_prompt=SYSTEM_PROMPT,
-        response_format=ErrorDiagnosis,
-    )
+    model = _get_model(config)
+    return build_agent_graph(model, filtered_tools)
+
+def build_agent_graph(model: BaseChatModel, tools: list[BaseTool]) -> Any:
+    """Build the pure LangGraph workflow for the agent.
+    
+    Args:
+        model: The LLM to use.
+        tools: The tools to make available.
+        
+    Returns:
+        The compiled StateGraph.
+    """
+    model_with_tools = model.bind_tools(tools + [ErrorDiagnosis])
+
+    async def call_model(state: AgentState) -> dict:
+        messages = list(state["messages"])
+        if not messages or messages[0].type != "system":
+            messages.insert(0, SystemMessage(content=SYSTEM_PROMPT))
+
+        response = await model_with_tools.ainvoke(messages)
+
+        if hasattr(response, "tool_calls") and response.tool_calls:
+            diag_call = next((tc for tc in response.tool_calls if tc["name"] == "ErrorDiagnosis"), None)
+            if diag_call:
+                try:
+                    # Pydantic validates here acting as the bouncer
+                    diagnosis = ErrorDiagnosis(**diag_call["args"])
+                    return {"messages": [response], "diagnosis": diagnosis}
+                except Exception as e:
+                    tool_msgs = []
+                    for tc in response.tool_calls:
+                        if tc["name"] == "ErrorDiagnosis":
+                            tool_msgs.append(ToolMessage(
+                                tool_call_id=tc["id"],
+                                content=f"Validation Error: {e}. Please fix the structure and try again.",
+                                name=tc["name"]
+                            ))
+                        else:
+                            tool_msgs.append(ToolMessage(
+                                tool_call_id=tc["id"],
+                                content="Cancelled because ErrorDiagnosis validation failed.",
+                                name=tc["name"]
+                            ))
+                    return {"messages": [response] + tool_msgs}
+
+        return {"messages": [response]}
+
+    def route_after_model(state: AgentState) -> str:
+        if state.get("diagnosis") is not None:
+            return END
+            
+        messages = state["messages"]
+        last_message = messages[-1]
+        
+        if last_message.type == "tool":
+            return "agent"
+            
+        if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+            return "tools"
+            
+        return END
+
+    workflow = StateGraph(AgentState)
+    workflow.add_node("agent", call_model)
+    workflow.add_node("tools", ToolNode(tools))
+
+    workflow.add_edge(START, "agent")
+    workflow.add_conditional_edges("agent", route_after_model, ["tools", "agent", END])
+    workflow.add_edge("tools", "agent")
+
+    return workflow.compile()
 
 
 async def diagnose_error(
@@ -287,7 +360,7 @@ async def diagnose_error(
 
     result = await agent.ainvoke({"messages": [{"role": "user", "content": prompt}]})
 
-    diagnosis = result.get("response_format")
+    diagnosis = result.get("diagnosis")
     if not isinstance(diagnosis, ErrorDiagnosis):
         raise RuntimeError("Agent failed to output a structured diagnosis.")
 
