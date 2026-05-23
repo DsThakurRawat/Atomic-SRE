@@ -100,27 +100,20 @@ async def run_case(case: DiagnosisQualityEvalCase) -> dict[str, Any]:
     tools.extend(mock_tools)
     tools.extend(github_tools)
 
-    from deepagents import create_deep_agent
-
-    from atomic_sre.core.agent import _get_model
+    from atomic_sre.core.agent import _get_model, build_agent_graph
     from atomic_sre.core.settings import get_settings
 
     config = get_settings()
     config.model = DEFAULT_MODEL
     model = _get_model(config)
 
-    agent = create_deep_agent(
-        model=model,
-        tools=tools,
-        system_prompt=SYSTEM_PROMPT,
-        response_format=ErrorDiagnosis,
-    )
+    agent = build_agent_graph(model, tools)
 
     result = await agent.ainvoke(
-        {"messages": [{"role": "user", "content": render_agent_prompt(case)}]}
+        {"messages": [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": render_agent_prompt(case)}]}
     )
 
-    diagnosis = result.get("response_format")
+    diagnosis = result.get("diagnosis")
     if not diagnosis:
         raise RuntimeError("Agent failed to output a structured diagnosis.")
 

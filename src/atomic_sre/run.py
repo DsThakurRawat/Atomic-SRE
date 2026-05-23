@@ -15,7 +15,7 @@ load_dotenv(env_path())
 # Configure logging to see tool calls and agent thoughts
 logging.basicConfig(level=logging.INFO)
 # Set logger to INFO to see agent activity
-logging.getLogger("deepagents").setLevel(logging.INFO)
+logging.getLogger("langgraph").setLevel(logging.INFO)
 
 
 def _load_request_from_args_or_env() -> tuple[str, str, int]:
