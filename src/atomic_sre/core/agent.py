@@ -241,7 +241,7 @@ class AgentState(TypedDict):
 
 async def create_atomic_sre(
     config: AgentSettings,
-) -> CompiledStateGraph[AgentState, Any, Any, Any]:
+) -> CompiledStateGraph[AgentState, Any, Any]:
     """Create the Atomic SRE with all toolsets configured using pure LangGraph.
 
     Args:
