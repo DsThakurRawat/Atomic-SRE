@@ -24,6 +24,7 @@ dependencies = [
     "questionary>=2.0.1",
     "platformdirs>=4.2.0",
     "langchain-groq>=1.1.2",
+    "langchain-google-genai>=2.0.1",
 ]
 
 [project.scripts]
