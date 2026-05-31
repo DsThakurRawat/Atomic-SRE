@@ -39,7 +39,7 @@ def _infer_provider(model_name: str) -> str:
         The inferred provider string, defaulting to 'openai'.
     """
     for prefix, provider in _MODEL_PREFIX_MAP.items():
-        if model_name.lower().startswith(prefix):
+        if model_name.lower().startswith(prefix.lower()):
             return provider
     return "openai"
 
