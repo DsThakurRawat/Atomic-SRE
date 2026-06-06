@@ -16,7 +16,7 @@ Welcome to **Atomic SRE**. This is a premium, open-source multi-agent orchestrat
 
 ## Prerequisites
 
-- Python 3.13+
+- Python 3.12+
 - [Docker](https://docs.docker.com/get-docker/) (required for local mode)
 
 ## 1. Install Atomic SRE
@@ -30,6 +30,9 @@ curl -sSL https://raw.githubusercontent.com/DsThakurRawat/Atomic-SRE/main/instal
 ```
 
 ### Option B: Python Package Manager (via pip)
+> [!NOTE]
+> This package will not be available on PyPI until the 0.2.1 tag is officially published. Alternatively, you can install it directly from GitHub: pip install git+https://github.com/DsThakurRawat/Atomic-SRE.git
+
 If you want to install the package directly from PyPI:
 ```bash
 pip install atomic-sre
@@ -147,7 +150,7 @@ graph LR
 
 Atomic SRE is built using modern, production-ready AI agent frameworks:
 
-- **Core Runtime**: Python 3.13+
+- **Core Runtime**: Python 3.12+
 - **Agent Orchestration**: [LangChain](https://github.com/langchain-ai/langchain) & [LangGraph](https://github.com/langchain-ai/langgraph) / [Deep Agents](https://github.com/langchain-ai/deepagents)
 - **MCP Client**: `MultiServerMCPClient` (from `langchain-mcp-adapters`) for dynamic tool invocation
 - **Evaluation & Tracing**: [Opik](https://github.com/comet-ml/opik) for automated span/trace capturing and dataset generation
