@@ -217,9 +217,9 @@ Atomic-SRE/
 
 We built a comprehensive evaluation suite to test both tool-use behaviour and diagnosis quality.
 
-- [Evaluation overview](src/atomic_sre/eval/README.md)
-- [Tool call evaluation](src/atomic_sre/eval/tool_call/README.md)
-- [Diagnosis quality evaluation](src/atomic_sre/eval/diagnosis_quality/README.md)
+- [Evaluation overview](src/atomic_sre/benchmarks/README.md)
+- [Tool call evaluation](src/atomic_sre/benchmarks/routing/README.md)
+- [Diagnosis quality evaluation](src/atomic_sre/benchmarks/diagnostics/README.md)
 
 Run the suites with:
 

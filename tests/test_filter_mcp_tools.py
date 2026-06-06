@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock
 
-from atomic_sre.core.agent import _filter_mcp_tools
+from atomic_sre.engine.orchestrator import _filter_mcp_tools
 
 
 def _mock_tool(name: str) -> MagicMock:

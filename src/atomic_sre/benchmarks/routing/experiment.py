@@ -1,0 +1,116 @@
+"""Tool call evaluation experiment.
+
+This module defines the Opik-based evaluation suites used to empirically measure the reliability,
+diagnostic precision, and tool-routing accuracy of the Atomic-SRE agent.
+"""
+
+import asyncio
+from typing import Any
+
+import opik
+from opik import Opik
+from opik.evaluation import evaluate
+from opik.evaluation.evaluation_result import EvaluationResult
+
+from atomic_sre.benchmarks.routing.config import (
+    DEFAULT_EXPERIMENT_NAME,
+    DEFAULT_MODEL,
+    DEFAULT_OPIK_PROJECT_NAME,
+)
+from atomic_sre.benchmarks.routing.dataset.create_and_populate import (
+    DEFAULT_DATASET_NAME,
+    create_and_populate_dataset,
+)
+from atomic_sre.benchmarks.routing.dataset.schema import ToolCallEvalCase
+from atomic_sre.benchmarks.routing.github_toolset import build_github_toolset
+from atomic_sre.benchmarks.routing.metrics.expected_tool_select_order import (
+    ExpectedToolSelectOrder,
+)
+from atomic_sre.benchmarks.routing.metrics.expected_tool_selection import ExpectedToolSelection
+from atomic_sre.benchmarks.routing.mocks import MockToolRuntime, build_mock_toolset
+from atomic_sre.benchmarks.routing.prompts import render_agent_prompt
+from atomic_sre.engine.prompts import SYSTEM_PROMPT
+
+
+def evaluation_task(dataset_item: dict[str, Any]) -> dict[str, Any]:
+    """Run one tool call case through the agent loop.
+
+    Args:
+        dataset_item: The dataset item to run.
+
+    Returns:
+        The task output dictionary for Opik scoring.
+    """
+    payload = dict(dataset_item)
+    payload.pop("id", None)
+    case = ToolCallEvalCase.model_validate(payload)
+    return asyncio.run(run_case(case))
+
+
+def run_experiment(dataset_name: str = DEFAULT_DATASET_NAME) -> EvaluationResult:
+    """Run the tool call evaluation in local mode.
+
+    Args:
+        dataset_name: The name of the dataset to run.
+
+    Returns:
+        The evaluation result.
+    """
+    opik.config.update_session_config("project_name", DEFAULT_OPIK_PROJECT_NAME)
+    opik.configure(use_local=True)
+    client = Opik(project_name=DEFAULT_OPIK_PROJECT_NAME)
+    dataset, _ = create_and_populate_dataset(client=client, dataset_name=dataset_name)
+
+    return evaluate(
+        dataset=dataset,
+        task=evaluation_task,
+        scoring_metrics=[ExpectedToolSelectOrder(), ExpectedToolSelection()],
+        experiment_name=DEFAULT_EXPERIMENT_NAME,
+        project_name=DEFAULT_OPIK_PROJECT_NAME,
+        experiment_config={
+            "suite": "tool_call",
+            "dataset": dataset_name,
+            "mode": "local",
+            "model": DEFAULT_MODEL,
+            "github_mode": "real_mcp",
+            "cloudwatch_mode": "mock",
+            "slack_mode": "mock",
+        },
+    )
+
+
+async def run_case(case: ToolCallEvalCase) -> dict[str, Any]:
+    """Execute one case using a real agent with hybrid toolsets.
+
+    Args:
+        case: The case to run.
+
+    Returns:
+        An empty dictionary, we will extract tool usage from the span tree.
+    """
+    runtime = MockToolRuntime(case)
+    github_tools = await build_github_toolset()
+    mock_tools = build_mock_toolset(runtime)
+
+    tools = []
+    tools.extend(mock_tools)
+    tools.extend(github_tools)
+
+    from atomic_sre.engine.orchestrator import _get_model, build_agent_graph
+    from atomic_sre.engine.settings import get_settings
+
+    config = get_settings()
+    config.model = DEFAULT_MODEL
+    model = _get_model(config)
+
+    agent = build_agent_graph(model, tools)
+
+    await agent.ainvoke(
+        {
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": render_agent_prompt(case)},
+            ]
+        }
+    )
+    return {}

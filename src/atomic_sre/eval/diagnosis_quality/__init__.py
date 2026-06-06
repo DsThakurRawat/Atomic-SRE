@@ -1,1 +1,0 @@
-"""Diagnosis quality evaluation suite."""

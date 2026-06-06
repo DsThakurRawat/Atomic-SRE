@@ -8,7 +8,7 @@ import sys
 from dotenv import load_dotenv
 
 from atomic_sre import diagnose_error
-from atomic_sre.config.paths import env_path
+from atomic_sre.settings.paths import env_path
 
 load_dotenv(env_path())
 

@@ -32,7 +32,7 @@ When adding a new tool/integration, follow one of these patterns:
 If an MCP server exists for the service, you can configure it inside the `connections` dictionary in `agent.py` to be loaded dynamically by `MultiServerMCPClient`.
 
 ```python
-# In src/atomic_sre/core/agent.py:
+# In src/atomic_sre/engine/orchestrator.py:
 connections = {
     "example": {
         "transport": "stdio",  # or "sse" / "streamable_http"
@@ -49,9 +49,9 @@ Use this when no MCP server is available. You must implement the relevant interf
 ```python
 # tools/example.py
 from langchain_core.tools import tool
-from atomic_sre.core.interfaces import LoggingInterface
-from atomic_sre.core.models import LogQueryResult
-from atomic_sre.core.settings import AgentSettings
+from atomic_sre.engine.definitions import LoggingInterface
+from atomic_sre.engine.models import LogQueryResult
+from atomic_sre.engine.settings import AgentSettings
 
 class ExampleLogging(LoggingInterface):
     async def query_errors(

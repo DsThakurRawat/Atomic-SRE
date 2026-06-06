@@ -28,9 +28,9 @@ dependencies = [
 ]
 
 [project.scripts]
-atomic-sre = "atomic_sre.cli.main:main"
-atomic-sre-run-tool-call-eval = "atomic_sre.eval.tool_call.run:main"
-atomic-sre-run-diagnosis-quality-eval = "atomic_sre.eval.diagnosis_quality.run:main"
+atomic-sre = "atomic_sre.interfaces.main:main"
+atomic-sre-run-tool-call-eval = "atomic_sre.benchmarks.routing.run:main"
+atomic-sre-run-diagnosis-quality-eval = "atomic_sre.benchmarks.diagnostics.run:main"
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -49,3 +49,7 @@ dev = [
     "ruff>=0.9.6",
     "pre-commit>=4.0.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

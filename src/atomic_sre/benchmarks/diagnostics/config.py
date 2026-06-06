@@ -1,0 +1,12 @@
+"""Configuration constants for diagnosis quality evaluation.
+
+This module defines the Opik-based evaluation suites used to empirically measure the reliability,
+diagnostic precision, and tool-routing accuracy of the Atomic-SRE agent.
+"""
+
+DEFAULT_EXPERIMENT_NAME = "atomic-sre-diagnosis-quality"
+DEFAULT_OPIK_PROJECT_NAME = "atomic-sre-eval"
+DEFAULT_MODEL = "claude-sonnet-4-6"
+DEFAULT_JUDGE_MODEL = DEFAULT_MODEL
+DEFAULT_TIME_RANGE_MINUTES = 10  # Needed for the diagnosis prompt.
+DEFAULT_SLACK_CHANNEL_ID = "MOCK_CHANNEL_ID"  # Needed for the diagnosis prompt.

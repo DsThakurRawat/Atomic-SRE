@@ -1,0 +1,19 @@
+Execute Atomic-SRE Diagnosis on CloudWatch log group '{log_group}' spanning the last {time_range_minutes} minutes.
+Target Service: {service_display}
+
+ATOMIC ORCHESTRATION SEQUENCE:
+1. Call `conversations_add_message` to initialize a dedicated incident thread in Slack.
+2. Interrogate AWS CloudWatch error logs for {service_display}.
+3. If logs indicate an exception, cross-reference the exact stack trace with GitHub source code.
+4. Publish the final root-cause analysis back to the Slack thread.
+
+GitHub Target Context:
+- Repository: {repo}
+- Owner: {owner}
+- Ref/Branch: {ref}
+- Boundary: Search and inspect code strictly within this repository.
+
+Slack Target Context:
+- Channel ID: {channel_id}
+
+IMPERATIVE: Do not skip the initialization step. The Slack incident thread must be created before any telemetry scanning begins.
