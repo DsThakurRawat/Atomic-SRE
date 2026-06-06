@@ -281,7 +281,7 @@ def _configure_model_provider(  # noqa: C901
         )
         if selected_model == "custom":
             selected_model = _prompt_text(
-                "Model ID (e.g. gpt-4o, claude-3-5-sonnet, etc.):",
+                "Model ID (e.g. gpt-5.5, claude-4-8-sonnet, etc.):",
                 current_model,
                 force_reconfigure,
             )
