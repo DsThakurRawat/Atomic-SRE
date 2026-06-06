@@ -37,27 +37,31 @@ MODEL_PROVIDER_CHOICES: tuple[tuple[str, str], ...] = (
 )
 
 MODEL_CHOICES_ANTHROPIC: tuple[tuple[str, str], ...] = (
-    ("Claude 3.5 Sonnet", "anthropic:claude-3-5-sonnet-20241022"),
-    ("Claude 3.5 Haiku", "anthropic:claude-3-5-haiku-20241022"),
-    ("Claude 3 Opus", "anthropic:claude-3-opus-20240229"),
+    ("Claude 4.8 Sonnet", "anthropic:claude-4-8-sonnet-latest"),
+    ("Claude 4.7 Sonnet", "anthropic:claude-4-7-sonnet-latest"),
+    ("Claude 4.8 Opus", "anthropic:claude-4-8-opus-latest"),
+    ("Claude 4.5 Haiku", "anthropic:claude-4-5-haiku-latest"),
 )
 
 MODEL_CHOICES_GROQ: tuple[tuple[str, str], ...] = (
-    ("Llama 3.3 70B (Versatile)", "groq:llama-3.3-70b-versatile"),
-    ("Llama 3.1 70B (Versatile)", "groq:llama-3.1-70b-versatile"),
-    ("Llama 3.1 8B (Instant)", "groq:llama-3.1-8b-instant"),
-    ("Mixtral 8x7B", "groq:mixtral-8x7b-32768"),
+    ("Llama 4 Scout 17B", "groq:llama-4-scout-17b-16e-instruct"),
+    ("Llama 3.3 70B", "groq:llama-3.3-70b-versatile"),
+    ("Qwen3 32B", "groq:qwen3-32b"),
+    ("MiniMax M2.5", "groq:minimax-m2.5"),
 )
 
 MODEL_CHOICES_OPENAI: tuple[tuple[str, str], ...] = (
-    ("GPT-4o", "openai:gpt-4o"),
-    ("GPT-4o mini", "openai:gpt-4o-mini"),
-    ("o1-preview", "openai:o1-preview"),
+    ("GPT-5.5", "openai:gpt-5.5"),
+    ("GPT-5.5 Pro", "openai:gpt-5.5-pro"),
+    ("GPT-5.4", "openai:gpt-5.4"),
+    ("GPT-5.4 Mini", "openai:gpt-5.4-mini"),
 )
 
 MODEL_CHOICES_GEMINI: tuple[tuple[str, str], ...] = (
-    ("Gemini 1.5 Pro", "google-gla:gemini-1.5-pro"),
-    ("Gemini 1.5 Flash", "google-gla:gemini-1.5-flash"),
+    ("Gemini 3.5 Flash", "google-gla:gemini-3.5-flash"),
+    ("Gemini 3.1 Pro", "google-gla:gemini-3.1-pro"),
+    ("Gemini 3.1 Flash-Lite", "google-gla:gemini-3.1-flash-lite"),
+    ("Gemini Spark", "google-gla:gemini-spark"),
 )
 
 NOTIFICATION_PLATFORM_CHOICES: tuple[tuple[str, str], ...] = (

@@ -65,4 +65,4 @@ def _get_version() -> str:
     try:
         return version("atomic-sre")
     except PackageNotFoundError:
-        return "0.2.0"
+        return "0.2.1"

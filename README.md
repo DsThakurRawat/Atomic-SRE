@@ -65,7 +65,7 @@ The wizard asks for:
 - `SLACK_BOT_TOKEN`, `SLACK_CHANNEL_ID`
 - AWS credentials (`AWS_PROFILE` or access keys) and `AWS_REGION`
 
-By default the agent uses `claude-sonnet-4-5-20250929`. You can override this by setting the `MODEL` environment variable.
+By default the agent uses `claude-4-8-sonnet-latest`. You can override this by setting the `MODEL` environment variable.
 
 ### AWS Permissions
 To run in Local mode, your AWS credentials must have permissions to query CloudWatch Logs. An IAM policy with the following permission is required:
