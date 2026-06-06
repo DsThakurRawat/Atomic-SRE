@@ -38,7 +38,7 @@ MODEL_PROVIDER_CHOICES: tuple[tuple[str, str], ...] = (
 
 MODEL_CHOICES_ANTHROPIC: tuple[tuple[str, str], ...] = (
     ("Claude 4.8 Sonnet", "anthropic:claude-4-8-sonnet-latest"),
-    ("Claude 3.5 Sonnet", "anthropic:claude-3-5-sonnet-20241022"),
+    ("Claude 4.7 Sonnet", "anthropic:claude-4-7-sonnet-latest"),
     ("Claude 3.5 Haiku", "anthropic:claude-3-5-haiku-20241022"),
     ("Claude 3 Opus", "anthropic:claude-3-opus-20240229"),
 )
@@ -47,17 +47,21 @@ MODEL_CHOICES_GROQ: tuple[tuple[str, str], ...] = (
     ("Llama 3.3 70B (Versatile)", "groq:llama-3.3-70b-versatile"),
     ("Llama 3.1 70B (Versatile)", "groq:llama-3.1-70b-versatile"),
     ("Llama 3.1 8B (Instant)", "groq:llama-3.1-8b-instant"),
+    ("DeepSeek R1 70B", "groq:deepseek-r1-distill-llama-70b"),
 )
 
 MODEL_CHOICES_OPENAI: tuple[tuple[str, str], ...] = (
     ("GPT-4o", "openai:gpt-4o"),
     ("GPT-4o mini", "openai:gpt-4o-mini"),
-    ("o1-preview", "openai:o1-preview"),
+    ("o1", "openai:o1"),
+    ("o3-mini", "openai:o3-mini"),
 )
 
 MODEL_CHOICES_GEMINI: tuple[tuple[str, str], ...] = (
+    ("Gemini 2.0 Flash", "google-gla:gemini-2.0-flash"),
     ("Gemini 1.5 Pro", "google-gla:gemini-1.5-pro"),
     ("Gemini 1.5 Flash", "google-gla:gemini-1.5-flash"),
+    ("Gemini 1.5 Flash-8B", "google-gla:gemini-1.5-flash-8b"),
 )
 
 NOTIFICATION_PLATFORM_CHOICES: tuple[tuple[str, str], ...] = (
