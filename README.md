@@ -31,7 +31,7 @@ curl -sSL https://raw.githubusercontent.com/DsThakurRawat/Atomic-SRE/main/instal
 
 ### Option B: Python Package Manager (via pip)
 > [!NOTE]
-> This package will not be available on PyPI until the `0.2.1` tag is officially published.
+> This package will not be available on PyPI until the 0.2.1 tag is officially published. Alternatively, you can install it directly from GitHub: pip install git+https://github.com/DsThakurRawat/Atomic-SRE.git
 
 If you want to install the package directly from PyPI:
 ```bash
