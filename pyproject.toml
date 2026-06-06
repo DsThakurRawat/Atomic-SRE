@@ -4,7 +4,7 @@ version = "0.2.1"
 description = "Flagship orchestration engine for the Autonomous Multi-Agent AI Organization, automating infrastructure monitoring, diagnosis, and self-healing."
 authors = [{ name = "DIVYANSH RAWAT", email = "divyanshrawatofficial@gmail.com" }]
 readme = "README.md"
-requires-python = ">=3.13,<4.0"
+requires-python = ">=3.12,<4.0"
 license = { text = "MIT" }
 dependencies = [
     "boto3>=1.42.39",
@@ -20,7 +20,7 @@ dependencies = [
     "langchain-anthropic>=0.3.6",
     "langchain-mcp-adapters",
     "langchain-aws",
-    "opik",
+    "opik>=2.0.40,<3.0",
     "questionary>=2.0.1",
     "platformdirs>=4.2.0",
     "langchain-groq>=1.1.2",
