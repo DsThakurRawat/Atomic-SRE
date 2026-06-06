@@ -73,7 +73,7 @@ class AgentSettings(BaseSettings):
     openrouter_api_key: str | None = Field(default=None, alias="OPENROUTER_API_KEY")
     ollama_host: str = Field(default="http://localhost:11434", alias="OLLAMA_HOST")
 
-    model: str = Field(default="claude-4-8-sonnet-latest", alias="MODEL")
+    model: str = Field(default="claude-sonnet-4-6", alias="MODEL")
 
     # Sub-configs (required)
     aws: AWSSettings
