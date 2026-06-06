@@ -31,7 +31,7 @@ def _build_banner() -> Panel:
     ascii_art = get_ascii_art().strip("\n")
 
     # Left-align the ASCII art lines to keep formatting intact, but centre the block
-    art_text = Text()
+    art_text = Text(no_wrap=True)
     for line in ascii_art.splitlines():
         art_text.append(f"{line}\n", style="bold green")
     centred_art = Align.center(art_text)  # spellchecker:disable-line

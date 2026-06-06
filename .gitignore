@@ -225,3 +225,7 @@ RELEASE.md
 
 # Temporary repository clones and benchmarks
 tmp_repos_files/
+
+# Web Landing Page
+web/node_modules/
+web/dist/
