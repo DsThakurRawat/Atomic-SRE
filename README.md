@@ -68,10 +68,8 @@ The wizard asks for:
 By default the agent uses `claude-sonnet-4-5-20250929`. You can override this by setting the `MODEL` environment variable.
 
 ### AWS Permissions
-To run in Local mode, your AWS credentials must have permissions to query CloudWatch Logs. An IAM policy with the following permissions is required:
-- `logs:DescribeLogGroups`
+To run in Local mode, your AWS credentials must have permissions to query CloudWatch Logs. An IAM policy with the following permission is required:
 - `logs:FilterLogEvents`
-- `logs:GetLogEvents`
 
 ### Evaluation and Tracing
 To enable tracing with Opik, configure:
@@ -100,7 +98,7 @@ Think about a microservice app where any service can fail at any time. **Atomic 
 
 In short, it handles the heavy lifting so your team can focus on fixing the issue quickly.
 
-Your application can run on Kubernetes, ECS, VMs, or elsewhere. The key requirement is that logs are available in CloudWatch.
+Your application can run on Kubernetes, ECS, VMs, or elsewhere. The key requirement is that logs are available in CloudWatch, and they must be structured JSON logs that include `log_processed.severity` and `log_processed.service` fields so that the engine can query them effectively (e.g., `{ $.log_processed.severity = "error" && $.log_processed.service = "<svc>" }`).
 
 # Architecture
 
@@ -183,8 +181,13 @@ Atomic-SRE/
 #### Model provider
 
 - [x] Anthropic
+- [x] OpenAI
+- [x] Groq
+- [x] Google Gemini
+- [x] Ollama
+- [x] OpenRouter
+- [x] AWS Bedrock
 - [ ] vLLM
-- [ ] OpenAI
 
 #### Logging platform
 
