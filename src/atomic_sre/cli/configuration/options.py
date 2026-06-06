@@ -37,7 +37,7 @@ MODEL_PROVIDER_CHOICES: tuple[tuple[str, str], ...] = (
 )
 
 MODEL_CHOICES_ANTHROPIC: tuple[tuple[str, str], ...] = (
-    ("Claude 3.5 Sonnet (Latest)", "anthropic:claude-sonnet-4-5-20250929"),
+    ("Claude 4.5 Sonnet", "anthropic:claude-sonnet-4-5-20250929"),
     ("Claude 3.5 Sonnet", "anthropic:claude-3-5-sonnet-20241022"),
     ("Claude 3.5 Haiku", "anthropic:claude-3-5-haiku-20241022"),
     ("Claude 3 Opus", "anthropic:claude-3-opus-20240229"),
