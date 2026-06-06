@@ -268,7 +268,11 @@ async def create_atomic_sre(
                 payload,
                 thread_ts,
             )
-            return {"status": "ok", "message": "Logged to console (Slack MCP unavailable)"}
+            return {
+                "status": "ok",
+                "message": "Logged to console (Slack MCP unavailable)",
+                "ts": "0000000000.000000",
+            }
 
         filtered_tools.append(conversations_add_message)
 
