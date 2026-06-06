@@ -37,10 +37,10 @@ MODEL_PROVIDER_CHOICES: tuple[tuple[str, str], ...] = (
 )
 
 MODEL_CHOICES_ANTHROPIC: tuple[tuple[str, str], ...] = (
-    ("Claude 4.8 Sonnet", "anthropic:claude-4-8-sonnet-latest"),
-    ("Claude 4.7 Sonnet", "anthropic:claude-4-7-sonnet-latest"),
-    ("Claude 4.8 Opus", "anthropic:claude-4-8-opus-latest"),
-    ("Claude 4.5 Haiku", "anthropic:claude-4-5-haiku-latest"),
+    ("Claude Sonnet 4.6", "anthropic:claude-sonnet-4-6"),
+    ("Claude Opus 4.8", "anthropic:claude-opus-4-8"),
+    ("Claude Opus 4.7", "anthropic:claude-opus-4-7"),
+    ("Claude Haiku 4.5", "anthropic:claude-haiku-4-5"),
 )
 
 MODEL_CHOICES_GROQ: tuple[tuple[str, str], ...] = (

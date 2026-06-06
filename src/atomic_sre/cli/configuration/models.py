@@ -33,7 +33,7 @@ class EcsConfig(BaseModel):
 class IntegrationConfig(BaseModel):
     """Integration and provider configuration values."""
 
-    model: str = "claude-4-8-sonnet-latest"
+    model: str = "claude-sonnet-4-6"
     model_provider: str = "anthropic"
     notification_platform: str = "slack"
     code_repository_provider: str = "github"
