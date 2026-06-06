@@ -11,8 +11,8 @@ ignore-dot = true
 [default]
 locale = "en-gb"
 extend-ignore-re = [
-    # Ignore lines that end with `# spellchecker:disable-line`
-    "(?Rm)^.*(#|//)\\s*spellchecker:disable-line$",
+    # Ignore lines that end with `# spellchecker:disable-line` or `%% spellchecker:disable-line`
+    "(?Rm)^.*(#|//|%%)\\s*spellchecker:disable-line$",
     # Ignore lines with HTML `<!-- spellchecker:disable-line -->`
     "(?Rm)^.*<!--\\s*spellchecker:disable-line\\s*-->.*$",
     # Ignore the line after `# spellchecker:ignore-next-line`:
