@@ -135,12 +135,12 @@ graph LR
         5 -->|Notify Slack| End([Review])
     end
 
-    style 1 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
-    style 2 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
-    style 3 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
-    style 4 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
-    style 5 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
-    style End fill:#15803D,stroke:#166534,stroke-width:2px,color:#fff <!-- spellchecker:disable-line -->
+    style 1 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff %% spellchecker:disable-line
+    style 2 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff %% spellchecker:disable-line
+    style 3 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff %% spellchecker:disable-line
+    style 4 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff %% spellchecker:disable-line
+    style 5 fill:#22C55E,stroke:#15803D,stroke-width:2px,color:#fff %% spellchecker:disable-line
+    style End fill:#15803D,stroke:#166534,stroke-width:2px,color:#fff %% spellchecker:disable-line
 ```
 
 # Technology Stack
