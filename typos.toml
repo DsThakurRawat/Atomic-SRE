@@ -16,7 +16,7 @@ extend-ignore-re = [
     # Ignore lines with HTML `<!-- spellchecker:disable-line -->`
     "(?Rm)^.*<!--\\s*spellchecker:disable-line\\s*-->.*$",
     # Ignore the line after `# spellchecker:ignore-next-line` or `%% spellchecker:ignore-next-line`:
-    "(#|//|%%)\\s*spellchecker:ignore-next-line\\n.*",
+    "(#|//|%%)\\s*spellchecker:ignore-next-line\\r?\\n.*",
     # Ignore blocks between `# spellchecker:off` and `# spellchecker:on`
     "(?s)(#|//|%%)\\s*spellchecker:off.*?\\n\\s*(#|//|%%)\\s*spellchecker:on",
 ]
