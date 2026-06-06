@@ -31,7 +31,9 @@ class RootCauseCorrectness(base_metric.BaseMetric):
                 "Compare the predicted root cause against the expected root cause. "
                 "Score high when they refer to the same underlying failure mechanism. "
                 "Penalise incorrect, unrelated, or vague diagnoses. "
-                "Return a score from 0.0 to 1.0 only (using discrete steps like 0.0, 0.25, 0.5, 0.75, 1.0). Provide the final score on a new line at the end of your response."
+                "Return a score from 0.0 to 1.0 only (using discrete steps "
+                "like 0.0, 0.25, 0.5, 0.75, 1.0). Provide the final score "
+                "on a new line at the end of your response."
             ),
             model=judge_model,
             name=f"{name}_judge",

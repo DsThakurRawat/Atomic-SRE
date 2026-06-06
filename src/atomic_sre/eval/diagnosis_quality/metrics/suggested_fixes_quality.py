@@ -33,7 +33,9 @@ class SuggestedFixesQuality(base_metric.BaseMetric):
                 "Score the predicted fix suggestions against expected fix suggestion mentions. "
                 "High scores require correct direction, concrete implementation guidance, "
                 "and alignment with the stated root cause. "
-                "Return a score from 0.0 to 1.0 only (using discrete steps like 0.0, 0.25, 0.5, 0.75, 1.0). Provide the final score on a new line at the end of your response."
+                "Return a score from 0.0 to 1.0 only (using discrete steps "
+                "like 0.0, 0.25, 0.5, 0.75, 1.0). Provide the final score "
+                "on a new line at the end of your response."
             ),
             model=judge_model,
             name=f"{name}_judge",
