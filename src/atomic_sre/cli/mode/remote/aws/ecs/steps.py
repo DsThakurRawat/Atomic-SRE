@@ -446,7 +446,8 @@ def print_cleanup_summary(config: CliConfig) -> None:
     console.print("[bold]Resources to clean up:[/bold]")
     console.print(f"- VPC: {config.deployment.vpc_id or 'not set'}")
     console.print(f"- Private subnets: {private_subnets}")
-    console.print("- NAT Gateway, Elastic IP, Internet Gateway, and Route Tables")
+    if config.deployment.vpc_id:
+        console.print("- NAT Gateway, Elastic IP, Internet Gateway, and Route Tables")
     console.print(f"- Security group: {config.deployment.security_group_id or 'not set'}")
     console.print(f"- ECS cluster: {config.ecs.cluster_name}")
     console.print(f"- Task definition: {config.deployment.task_definition_arn or 'not set'}")
