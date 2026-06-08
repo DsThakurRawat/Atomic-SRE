@@ -1,4 +1,4 @@
-<div align="center">
+<div align="center"> <!-- spellchecker:disable-line -->
 
   <img src="docs/imgs/banner-v2.png" alt="Atomic SRE Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;">
 
@@ -118,7 +118,7 @@ atomic-sre
 > - `SLACK_BOT_TOKEN`, `SLACK_CHANNEL_ID`
 > - AWS credentials (`AWS_PROFILE` or standard access keys) and `AWS_REGION`
 
-<div align="center">
+<div align="center"> <!-- spellchecker:disable-line -->
   <img src="docs/imgs/cli-setup.png" alt="CLI Setup Wizard" width="80%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px;">
   <br/>
   <img src="docs/imgs/cli-home.png" alt="CLI Home Interface" width="80%" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
@@ -337,7 +337,7 @@ We encourage you to fork, hack, and improve Atomic SRE. For a comprehensive brea
 
 ## Community & Contributions
 
-<div align="center">
+<div align="center"> <!-- spellchecker:disable-line -->
   <p>Built with ❤️ by a team passionate about mastering AI in production environments.</p>
   <p>We are sharing this journey in the open. Read more about the philosophy and technical deep-dives on the <a href="https://www.DsThakurRawat.ai/blog">DIVYANSH RAWAT blog</a>.</p>
   <p><b>Contributions are highly welcomed!</b> Whether it's adding a new logging provider, tweaking the prompts, or fixing a bug, please check out our <a href="CONTRIBUTING.md">Contributing Guidelines</a> and join us in shaping the future of autonomous DevOps.</p>
