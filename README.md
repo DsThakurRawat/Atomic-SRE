@@ -1,5 +1,5 @@
 <div align="center">
-  
+
   <img src="docs/imgs/banner-v2.png" alt="Atomic SRE Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;">
 
   <h1>Atomic SRE</h1>
@@ -146,10 +146,10 @@ sequenceDiagram
     Trigger->>Engine: Initiate Diagnosis Task
     Engine->>CW: Query Logs (Filter: severity="ERROR")
     CW-->>Engine: Structured JSON Log Stream
-    
+
     Engine->>LLM: Parse Logs & Identify Target Service
     LLM-->>Engine: Extracted: `payment-service`, `NullReferenceException`
-    
+
     rect rgb(20, 20, 25)
         Note over Engine,MCP: Autonomous Code Context Fetching Loop
         Engine->>MCP: List Directory (`/src/payment`)
@@ -159,7 +159,7 @@ sequenceDiagram
         Engine->>MCP: Read File (`/src/payment/handlers.go`)
         MCP-->>Engine: Source Code Content
     end
-    
+
     Engine->>LLM: Synthesize Root Cause & Fix using Code + Logs
     LLM-->>Engine: Final Diagnosis Markdown Report
     Engine->>Slack: Dispatch Formatted Report
@@ -178,23 +178,23 @@ stateDiagram-v2
         FetchLogs: Query CloudWatch
         FilterLogs: Apply Time/Severity Filters
     }
-    
+
     LogRetrieval --> IdentifyContext
-    
+
     state IdentifyContext {
         ExtractService: Parse service name
         ExtractErrors: Isolate specific stack traces
     }
 
     IdentifyContext --> CodeContextLoop
-    
+
     state CodeContextLoop {
         CheckCache: Has sufficient code context?
         CallMCP: Invoke GitHub MCP API for files/directories
     }
-    
+
     CodeContextLoop --> DecideNextAction
-    
+
     state DecideNextAction <<choice>>
     DecideNextAction --> CodeContextLoop : Needs more files (Loop)
     DecideNextAction --> SynthesizeDiagnosis : Context sufficient
@@ -203,7 +203,7 @@ stateDiagram-v2
         DraftRC: Draft Root Cause Explanation
         DraftFix: Draft Specific Code Diff
     }
-    
+
     SynthesizeDiagnosis --> Formatting
     Formatting --> SlackNotification
     SlackNotification --> [*]: Await Human Review
