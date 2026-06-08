@@ -1,7 +1,7 @@
 """Shared filesystem paths for user configuration.
 
 This module handles global configuration schemas, environment variable parsing, and
-centralized pathing utilities for the Atomic-SRE platform.
+centralised pathing utilities for the Atomic-SRE platform.
 """
 
 from pathlib import Path

@@ -128,7 +128,7 @@ atomic-sre
 
 ## Architecture Under the Hood
 
-Atomic SRE is built on top of state-of-the-art agentic frameworks like **LangGraph** and **LangChain**, utilizing the **Model Context Protocol (MCP)** to dynamically fetch source code without keeping the entire repository in memory.
+Atomic SRE is built on top of state-of-the-art agentic frameworks like **LangGraph** and **LangChain**, utilising the **Model Context Protocol (MCP)** to dynamically fetch source code without keeping the entire repository in memory.
 
 ### Detailed Sequence Flow
 
@@ -160,7 +160,7 @@ sequenceDiagram
         MCP-->>Engine: Source Code Content
     end
 
-    Engine->>LLM: Synthesize Root Cause & Fix using Code + Logs
+    Engine->>LLM: Synthesise Root Cause & Fix using Code + Logs
     LLM-->>Engine: Final Diagnosis Markdown Report
     Engine->>Slack: Dispatch Formatted Report
     Slack-->>Human: Review Fix & Apply
@@ -197,14 +197,14 @@ stateDiagram-v2
 
     state DecideNextAction <<choice>>
     DecideNextAction --> CodeContextLoop : Needs more files (Loop)
-    DecideNextAction --> SynthesizeDiagnosis : Context sufficient
+    DecideNextAction --> SynthesiseDiagnosis : Context sufficient
 
-    state SynthesizeDiagnosis {
+    state SynthesiseDiagnosis {
         DraftRC: Draft Root Cause Explanation
         DraftFix: Draft Specific Code Diff
     }
 
-    SynthesizeDiagnosis --> Formatting
+    SynthesiseDiagnosis --> Formatting
     Formatting --> SlackNotification
     SlackNotification --> [*]: Await Human Review
 ```
