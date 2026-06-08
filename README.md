@@ -2,7 +2,7 @@
   
   <img src="docs/imgs/banner-v2.png" alt="Atomic SRE Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;">
 
-  <h1>⚛️ Atomic SRE</h1>
+  <h1>Atomic SRE</h1>
 
   <p><b>The Flagship Orchestration Engine for the Autonomous Multi-Agent AI Organisation</b></p>
 
@@ -21,27 +21,28 @@
 
 ---
 
-## 📖 Table of Contents
+## Table of Contents
 
-- [Why Atomic SRE?](#-why-atomic-sre)
-- [Key Capabilities](#-key-capabilities)
-- [Quick Start](#-quick-start)
+- [Why Atomic SRE?](#why-atomic-sre)
+- [Key Capabilities](#key-capabilities)
+- [Quick Start](#quick-start)
   - [Prerequisites](#prerequisites)
   - [Installation](#1-installation)
   - [Launch the CLI](#2-launch-the-cli)
-- [Architecture Under the Hood](#-architecture-under-the-hood)
+- [Architecture Under the Hood](#architecture-under-the-hood)
   - [Detailed Sequence Flow](#detailed-sequence-flow)
   - [LangGraph State Machine](#langgraph-state-machine)
-- [Operational Modes](#-operational-modes)
-- [Integration Matrix](#-integration-matrix)
-- [Evaluation & Tracing](#-evaluation--tracing)
-- [Configuration](#-configuration)
-- [For Developers](#-for-developers)
-- [Community & Contributions](#-community--contributions)
+- [Operational Modes](#operational-modes)
+- [Integration Matrix](#integration-matrix)
+- [Evaluation & Tracing](#evaluation--tracing)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [For Developers](#for-developers)
+- [Community & Contributions](#community--contributions)
 
 ---
 
-## 🎯 Why Atomic SRE?
+## Why Atomic SRE?
 
 Modern microservice architectures are incredibly resilient, but when they fail, they fail in complex, cascading ways. Traditional observability platforms will alert you that an issue has occurred, and a PagerDuty ping will wake you up at 3 AM. However, the human operator is still left to:
 
@@ -56,26 +57,26 @@ You aren't just getting an alert; you're getting a pull request ready to be merg
 
 ---
 
-## ✨ Key Capabilities
+## Key Capabilities
 
-### 🧠 Autonomous Diagnosis
+### Autonomous Diagnosis
 Atomic SRE doesn't just read stack traces; it reasons about them. By extracting `log_processed.severity` and `log_processed.service` dynamically from your structured JSON logs, it maps the exact failing component to its underlying logic, discarding irrelevant noise.
 
-### 🔍 Deep Code Context (Powered by MCP)
+### Deep Code Context (Powered by MCP)
 Unlike traditional static analysis tools, Atomic SRE leverages the **Model Context Protocol (MCP)** to securely and dynamically query your GitHub repositories. It fetches directory trees, reads specific file contents, and searches for relevant functions in real-time, exactly as a human developer would when debugging.
 
-### 🚀 Actionable Insights
+### Actionable Insights
 The output isn't a vague summary of the error. It's a structured JSON payload or Markdown report containing:
 - The exact root cause of the crash.
 - A step-by-step reasoning trace.
 - A concrete, actionable fix (often with diffs or specific line changes).
 
-### 💬 Human-in-the-Loop Alerting
+### Human-in-the-Loop Alerting
 Atomic SRE is designed to augment, not blindly replace, human engineers. All diagnostics, traces, and code suggestions are formatted beautifully and sent directly to your configured Slack channels for review before any action is taken.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - **Python 3.12+**
@@ -111,7 +112,7 @@ atomic-sre
 
 > **The Setup Wizard**
 > On your first run, a sleek interactive wizard will guide you through connecting your required API keys. You will need:
-> - `ANTHROPIC_API_KEY` (or an alternative provider, though Claude Sonnet 3.5 is the default)
+> - **LLM Provider API Key**: Provide one of the following based on your preferred model provider: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GROQ_API_KEY`, `GOOGLE_API_KEY`, or `OPENROUTER_API_KEY`. (The default model identifier is `claude-sonnet-4-6`).
 > - `GITHUB_PERSONAL_ACCESS_TOKEN`
 > - `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_REF`
 > - `SLACK_BOT_TOKEN`, `SLACK_CHANNEL_ID`
@@ -125,7 +126,7 @@ atomic-sre
 
 ---
 
-## 🏗️ Architecture Under the Hood
+## Architecture Under the Hood
 
 Atomic SRE is built on top of state-of-the-art agentic frameworks like **LangGraph** and **LangChain**, utilizing the **Model Context Protocol (MCP)** to dynamically fetch source code without keeping the entire repository in memory.
 
@@ -210,7 +211,7 @@ stateDiagram-v2
 
 ---
 
-## ⚙️ Operational Modes
+## Operational Modes
 
 Atomic SRE can be run in two distinct modes depending on your infrastructure needs:
 
@@ -222,7 +223,7 @@ Designed for true production SRE automation. The agent runtime is packaged and d
 
 ---
 
-## 🔌 Integration Matrix
+## Integration Matrix
 
 Atomic SRE is designed to be highly extensible. We are continuously adding support for more providers across the observability and LLM spectrum.
 
@@ -238,7 +239,7 @@ Atomic SRE is designed to be highly extensible. We are continuously adding suppo
 
 ---
 
-## 🧪 Evaluation & Tracing
+## Evaluation & Tracing
 
 LLMs can hallucinate, and in an SRE context, hallucinations can be dangerous. We believe in **measurable AI**. Atomic SRE includes a comprehensive, automated evaluation suite to test both **tool-use behaviour** and **diagnosis quality**.
 
@@ -261,13 +262,19 @@ For detailed metrics, see the benchmark docs:
 
 ---
 
-## 🛠️ Configuration
+## Configuration
 
 Beyond the initial setup wizard, Atomic SRE can be fine-tuned using environment variables. You can add these to your `.env` file in the project root:
 
 | Variable | Description | Default |
 | :--- | :--- | :--- |
-| `MODEL` | The specific LLM model identifier to use for the main reasoning loop. | `claude-3-5-sonnet-20241022` |
+| `MODEL` | The specific LLM model identifier to use for the main reasoning loop. | `claude-sonnet-4-6` |
+| `ANTHROPIC_API_KEY` | Your Anthropic API key (if using Claude models). | *None* |
+| `OPENAI_API_KEY` | Your OpenAI API key (if using OpenAI models). | *None* |
+| `GROQ_API_KEY` | Your Groq API key (if using Groq models). | *None* |
+| `GOOGLE_API_KEY` | Your Google API key (if using Gemini models). | *None* |
+| `OPENROUTER_API_KEY`| Your OpenRouter API key (if using OpenRouter models). | *None* |
+| `OLLAMA_HOST` | Host URL for your local Ollama instance. | `http://localhost:11434` |
 | `AWS_PROFILE` | Named AWS profile for CloudWatch access. | `default` |
 | `AWS_REGION` | The AWS region where your logs reside. | `us-east-1` |
 | `OPIK_API_KEY` | Your Opik API key for enabling tracing and evaluations. | *None* |
@@ -275,7 +282,30 @@ Beyond the initial setup wizard, Atomic SRE can be fine-tuned using environment 
 
 ---
 
-## 👨‍💻 For Developers
+## Project Structure
+
+Here is the folder structure of the `Atomic-SRE` project workspace:
+
+```text
+Atomic-SRE/
+├── docs/                 # Documentation and visual assets
+│   └── imgs/             # CLI screenshots, home banner, and logos
+├── src/
+│   └── atomic_sre/       # Core package source code
+│       ├── cli/          # CLI presentation, configurations, and guided shell
+│       ├── config/       # Shared path settings and global configurations
+│       ├── core/         # Core agent reasoning logic, model routing, and tool definitions
+│       └── eval/         # Evaluation suites for tool calls and diagnosis quality
+├── tests/                # Unit test suite
+├── pyproject.toml        # Build configuration, script entrypoints, and dependencies
+├── install.sh            # Automated curl installation script
+├── README.md             # Project overview and quick start guide
+└── DEVELOPMENT.md        # Technical developer guide
+```
+
+---
+
+## For Developers
 
 We encourage you to fork, hack, and improve Atomic SRE. For a comprehensive breakdown of the internal file structure and development workflows, please read our [DEVELOPMENT.md](DEVELOPMENT.md) guide.
 
@@ -305,7 +335,7 @@ We encourage you to fork, hack, and improve Atomic SRE. For a comprehensive brea
 
 ---
 
-## 🤝 Community & Contributions
+## Community & Contributions
 
 <div align="center">
   <p>Built with ❤️ by a team passionate about mastering AI in production environments.</p>
