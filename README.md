@@ -328,7 +328,7 @@ We encourage you to fork, hack, and improve Atomic SRE. For a comprehensive brea
    ```bash
    # Ensure Slack simulator or actual Slack config is ready
    docker compose up -d slack
-   
+
    # Run against a specific log group, service, and timeframe
    uv run python -m atomic_sre.run /aws/containerinsights/production/application my-failing-service 10
    ```
