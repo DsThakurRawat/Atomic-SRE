@@ -13,7 +13,7 @@ fi
 # Check for uv package manager, install if missing
 if ! command -v uv &>/dev/null; then
     echo "📦 installing uv package manager..."
-    curl -sSf https://astral.sh/uv/install.sh | sh
+    curl -LsSf https://astral.sh/uv/install.sh | sh
     # Load uv environment path
     if [ -f "$HOME/.local/bin/env" ]; then
         source "$HOME/.local/bin/env"
