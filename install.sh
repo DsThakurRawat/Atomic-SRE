@@ -47,10 +47,31 @@ cd "$(pwd)" && uv run atomic-sre "\$@"
 EOF
 chmod +x "$HOME/.local/bin/atomic-sre"
 
-echo "Atomic SRE installed successfully!"
-echo ""
-echo "You can now run it directly from anywhere:"
-echo "  atomic-sre"
-echo ""
-echo "(Note: Ensure ~/.local/bin is in your PATH if the command is not found)"
-echo ""
+# Add ~/.local/bin to PATH permanently if it's not already there
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+    echo "Configuring PATH to include ~/.local/bin..."
+    
+    # Check for bash
+    if [ -f "$HOME/.bashrc" ] && ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.bashrc"; then
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+    fi
+    
+    # Check for zsh
+    if [ -f "$HOME/.zshrc" ] && ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.zshrc"; then
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+    fi
+    
+    echo "Atomic SRE installed successfully!"
+    echo ""
+    echo "⚠️  IMPORTANT: To start using the tool, either restart your terminal"
+    echo "or run the appropriate source command for your shell:"
+    echo "  source ~/.zshrc    (if using zsh)"
+    echo "  source ~/.bashrc   (if using bash)"
+    echo ""
+else
+    echo "Atomic SRE installed successfully!"
+    echo ""
+    echo "You can now run it directly from anywhere:"
+    echo "  atomic-sre"
+    echo ""
+fi
